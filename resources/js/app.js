@@ -180,3 +180,81 @@ if (loginForm) {
             "Memproses...";
     });
 }
+
+
+// Category management interactions.
+const categoryModal = document.querySelector("[data-category-modal]");
+const categoryForm = document.querySelector("[data-category-form]");
+const categoryName = document.querySelector("#category-name");
+const categoryMethod = document.querySelector("[data-category-method]");
+const categoryTitle = document.querySelector("[data-category-modal-title]");
+const categoryStoreUrl = categoryForm?.action;
+
+const openCategoryModal = (title, action, method, name = "") => {
+    if (!categoryModal || !categoryForm) return;
+    categoryTitle.textContent = title;
+    categoryForm.action = action;
+    categoryMethod.value = method;
+    categoryName.value = name;
+    categoryModal.showModal();
+    categoryName.focus();
+};
+
+document.querySelector("[data-category-create]")?.addEventListener("click", () => {
+    openCategoryModal("Tambah kategori", categoryStoreUrl, "POST");
+});
+
+document.querySelectorAll("[data-category-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+        openCategoryModal("Edit kategori", button.dataset.url, "PUT", button.dataset.name);
+    });
+});
+
+document.querySelectorAll("[data-category-close]").forEach((button) => {
+    button.addEventListener("click", () => categoryModal?.close());
+});
+
+const selectAll = document.querySelector("[data-select-all]");
+const rowCheckboxes = [...document.querySelectorAll("[data-row-checkbox]")];
+
+selectAll?.addEventListener("change", () => {
+    rowCheckboxes.forEach((checkbox) => { checkbox.checked = selectAll.checked; });
+});
+
+rowCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", () => {
+    if (selectAll) {
+        selectAll.checked = rowCheckboxes.length > 0 && rowCheckboxes.every((item) => item.checked);
+    }
+}));
+
+document.querySelectorAll("[data-bulk-submit]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+        if (!rowCheckboxes.some((checkbox) => checkbox.checked)) {
+            event.preventDefault();
+            window.alert("Pilih minimal satu kategori terlebih dahulu.");
+            return;
+        }
+
+        const action = button.dataset.bulkSubmit;
+        const message = action === "force_delete"
+            ? "Hapus permanen kategori yang dipilih? Tindakan ini tidak dapat dibatalkan."
+            : action === "restore" ? "Pulihkan kategori yang dipilih?" : "Pindahkan kategori yang dipilih ke sampah?";
+
+        if (!window.confirm(message)) {
+            event.preventDefault();
+            return;
+        }
+
+        document.querySelector("[data-bulk-action]").value = action;
+    });
+});
+
+document.querySelectorAll("[data-confirm]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+        if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+});
+
+if (categoryModal && document.querySelector("[data-category-validation-error]")) {
+    categoryModal.showModal();
+}
