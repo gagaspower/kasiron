@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -34,6 +35,15 @@ Route::middleware('auth')->group(function () {
             ],
         ]);
     })->name('products.index');
+
+    Route::get('/kategori', [KategoriController::class, 'index'])->name('categories.index');
+    Route::post('/kategori', [KategoriController::class, 'store'])->name('categories.store');
+    Route::put('/kategori/{kategori}', [KategoriController::class, 'update'])->name('categories.update');
+    Route::patch('/kategori/{kategori}/status', [KategoriController::class, 'toggleStatus'])->name('categories.toggle-status');
+    Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy'])->name('categories.destroy');
+    Route::patch('/kategori/{id}/restore', [KategoriController::class, 'restore'])->name('categories.restore');
+    Route::delete('/kategori/{id}/permanen', [KategoriController::class, 'forceDelete'])->name('categories.force-delete');
+    Route::post('/kategori/bulk-action', [KategoriController::class, 'bulkAction'])->name('categories.bulk-action');
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
