@@ -54,3 +54,7 @@
         </form>
     </dialog>
 @endsection
+
+@section('script')
+    @vite('resources/js/pages/categories.js')
+@endsection
