@@ -93,6 +93,6 @@
             </div>
             <div class="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-xs text-slate-500">Menampilkan {{ $categories->firstItem() ?? 0 }}–{{ $categories->lastItem() ?? 0 }} dari {{ $categories->total() }} kategori</p>
-                {{ $categories->onEachSide(1)->links('pagination::tailwind') }}
+                {{ $categories->onEachSide(1)->links('vendor.pagination.kasiron') }}
             </div>
     </section>
