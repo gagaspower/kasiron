@@ -34,6 +34,11 @@ const showCategoryNotice = (message, isError = false) => {
 const refreshCategoryResults = async (url = window.location.href, options = {}) => {
     if (!categoryResults) return;
     const target = new URL(url, window.location.origin);
+    const focusedSearch = document.activeElement?.matches("[data-category-search]") === true;
+    const searchSelection = focusedSearch
+        ? [document.activeElement.selectionStart, document.activeElement.selectionEnd]
+        : null;
+
     const response = await fetch(target, {
         headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
         ...options,
@@ -41,6 +46,16 @@ const refreshCategoryResults = async (url = window.location.href, options = {}) 
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.message || "Tidak dapat memuat data kategori.");
     categoryResults.innerHTML = payload.html;
+
+    // Re-focus the newly rendered search field so typing can continue uninterrupted.
+    if (focusedSearch) {
+        const nextSearch = categoryResults.querySelector("[data-category-search]");
+        if (nextSearch) {
+            nextSearch.focus({ preventScroll: true });
+            if (searchSelection) nextSearch.setSelectionRange(...searchSelection);
+        }
+    }
+
     if (options.history !== false) window.history.pushState({}, "", payload.url || target);
     return payload;
 };
