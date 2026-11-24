@@ -54,4 +54,43 @@ class LoginTest extends TestCase
             ->get('/')
             ->assertRedirect(route('dashboard'));
     }
+
+        public function test_login_is_blocked_after_too_many_failed_attempts(): void
+    {
+        $user = User::factory()->create(['password' => 'rahasia123']);
+
+        foreach (range(1, 5) as $attempt) {
+            $this->post('/login', ['email' => $user->email, 'password' => 'salah']);
+        }
+
+        $this->post('/login', ['email' => $user->email, 'password' => 'rahasia123'])
+            ->assertSessionHasErrors('email');
+
+        $this->assertStringContainsString(
+            'Terlalu banyak percobaan masuk',
+            session('errors')->first('email'),
+        );
+        $this->assertGuest();
+    }
+
+        public function test_user_can_logout(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post('/logout')
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+    }
+
+    public function test_guest_cannot_use_logout_route(): void
+    {
+        $this->post('/logout')->assertRedirect(route('login'));
+    }
+
+    public function test_dashboard_navbar_logout_form_points_to_logout_route(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/dashboard')
+            ->assertSee('action="'.route('logout').'"', false);
+    }
 }

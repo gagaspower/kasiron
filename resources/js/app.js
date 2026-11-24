@@ -63,9 +63,7 @@ document.querySelectorAll("[data-account-action]").forEach((action) => {
         }
 
         accountNoticeMessage.textContent =
-            action.dataset.accountAction === "password"
-                ? "Ganti password akan tersedia setelah autentikasi akun diaktifkan."
-                : "Logout akan tersedia setelah autentikasi akun diaktifkan.";
+            "Ganti password akan tersedia setelah autentikasi akun diaktifkan.";
         accountNotice.hidden = false;
         accountNotice.classList.remove("hidden");
         accountNotice.classList.add("flex");

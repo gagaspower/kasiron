@@ -2,13 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
+    use RefreshDatabase;
+
+    public function test_guest_is_redirected_to_login(): void
+    {
+        $this->get('/dashboard')->assertRedirect(route('login'));
+    }
+
     public function test_dashboard_renders_the_store_overview_and_recent_transactions(): void
     {
-        $response = $this->get('/');
+        $response = $this->actingAs(User::factory()->create())->get('/dashboard');
 
         $response->assertOk()
             ->assertSee('Dashboard')
@@ -26,7 +35,7 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_exposes_installable_pwa_metadata_and_icons(): void
     {
-        $response = $this->get('/');
+        $response = $this->actingAs(User::factory()->create())->get('/dashboard');
         $manifest = json_decode(
             file_get_contents(public_path('manifest.webmanifest')),
             true,
