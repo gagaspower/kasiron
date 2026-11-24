@@ -57,7 +57,8 @@ class KategoriController extends Controller
 
         if ($validator->fails()) {
             return redirect()->route('categories.index')->withErrors($validator)->withInput()
-                ->with('category_form_action', route('categories.update', $kategori));
+                ->with('category_form_action', route('categories.update', $kategori))
+                ->with('category_form_method', 'PUT');
         }
 
         $kategori->update(['nama' => $validator->validated()['nama']]);
