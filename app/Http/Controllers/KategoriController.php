@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class KategoriController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $trash = $request->string('status')->value() === 'trash';
         $search = trim($request->string('search')->value());
@@ -37,7 +37,7 @@ class KategoriController extends Controller
         return view('products.categories.index', $data);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama' => ['required', 'string', 'max:255', Rule::unique('kategori', 'nama')],
@@ -55,7 +55,7 @@ class KategoriController extends Controller
         return $this->respondAfterMutation($request, 'Kategori berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Kategori $kategori): RedirectResponse
+    public function update(Request $request, Kategori $kategori)
     {
         $validator = Validator::make($request->all(), [
             'nama' => ['required', 'string', 'max:255', Rule::unique('kategori', 'nama')->ignore($kategori->id)],
@@ -74,28 +74,28 @@ class KategoriController extends Controller
         return $this->respondAfterMutation($request, 'Kategori berhasil diperbarui.');
     }
 
-    public function toggleStatus(Request $request, Kategori $kategori): RedirectResponse
+    public function toggleStatus(Request $request, Kategori $kategori)
     {
         $kategori->update(['aktif' => ! $kategori->aktif]);
 
         return $this->respondAfterMutation($request, 'Status kategori berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, Kategori $kategori): RedirectResponse
+    public function destroy(Request $request, Kategori $kategori)
     {
         $kategori->delete();
 
         return $this->respondAfterMutation($request, 'Kategori dipindahkan ke sampah.');
     }
 
-    public function restore(Request $request, string $id): RedirectResponse
+    public function restore(Request $request, string $id)
     {
         Kategori::onlyTrashed()->findOrFail($id)->restore();
 
         return $this->respondAfterMutation($request, 'Kategori berhasil dipulihkan.');
     }
 
-    public function forceDelete(Request $request, string $id): RedirectResponse
+    public function forceDelete(Request $request, string $id)
     {
         $kategori = Kategori::onlyTrashed()->findOrFail($id);
 
@@ -109,7 +109,7 @@ class KategoriController extends Controller
         return $this->respondAfterMutation($request, 'Kategori berhasil dihapus permanen.');
     }
 
-    public function bulkAction(Request $request): RedirectResponse
+    public function bulkAction(Request $request)
     {
         $validated = $request->validate([
             'action' => ['required', Rule::in(['trash', 'restore', 'force_delete'])],
