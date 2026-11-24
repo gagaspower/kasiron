@@ -9,7 +9,7 @@ const pwaRevision = Date.now().toString();
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/pages/categories.js'],
             refresh: true,
             fonts: [
                 bunny('Inter', {
