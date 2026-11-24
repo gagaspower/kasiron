@@ -10,7 +10,11 @@ let categorySearchTimer;
 
 const categoryContext = () => {
     const params = new URLSearchParams(window.location.search);
-    return { status: params.get("status") || "active", search: params.get("search") || "" };
+    return {
+        status: params.get("status") || "active",
+        search: params.get("search") || "",
+        page: params.get("page") || "1",
+    };
 };
 
 const showCategoryNotice = (message, isError = false) => {
@@ -46,6 +50,7 @@ const ajaxCategoryForm = async (form) => {
     const context = categoryContext();
     data.set("status", context.status);
     data.set("search", context.search);
+    data.set("page", context.page);
     const response = await fetch(form.getAttribute("action"), {
         method: "POST",
         body: data,
