@@ -127,7 +127,7 @@
     </section>
 
     @if($errors->any())<span data-category-validation-error class="hidden"></span>@endif
-    <dialog data-category-modal class="w-[calc(100%-2rem)] max-w-md rounded-2xl border-0 bg-white p-0 shadow-2xl backdrop:bg-slate-950/40">
+    <dialog data-category-modal class="fixed inset-0 m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl backdrop:bg-slate-950/40">
         <form method="POST" action="{{ session('category_form_action', route('categories.store')) }}" data-category-form>
             @csrf
             <input type="hidden" name="_method" value="{{ session('category_form_method', 'POST') }}" data-category-method>
