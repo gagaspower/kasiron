@@ -27,7 +27,7 @@
             </span>
             <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition group-hover:translate-x-1 group-hover:bg-blue-50 group-hover:text-blue-700">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 17 17 7M8 7h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </span>
         </a>
@@ -45,7 +45,7 @@
             </span>
             <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition group-hover:translate-x-1 group-hover:bg-violet-50 group-hover:text-violet-700">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 17 17 7M8 7h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </span>
         </a>
@@ -64,7 +64,7 @@
             </span>
             <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition group-hover:translate-x-1 group-hover:bg-teal-50 group-hover:text-teal-700">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 17 17 7M8 7h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </span>
         </a>
