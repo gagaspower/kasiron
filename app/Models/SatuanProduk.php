@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'produk_id',
-    'nama_satuan',
+    'satuan_id',
     'konversi_ke_satuan_dasar',
     'presisi_kuantitas',
     'harga_jual',
@@ -50,5 +50,10 @@ class SatuanProduk extends Model
             'satuan_utama' => 'boolean',
             'aktif' => 'boolean',
         ];
+    }
+
+    public function satuan(): BelongsTo
+    {
+        return $this->belongsTo(Satuan::class, 'satuan_id');
     }
 }

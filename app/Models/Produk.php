@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'kategori_id',
     'kode_sku',
     'nama',
-    'satuan_dasar',
+    'satuan_dasar_id',
     'jumlah_stok',
     'stok_minimum',
     'aktif',
@@ -58,5 +58,11 @@ class Produk extends Model
             'stok_minimum' => 'decimal:6',
             'aktif' => 'boolean',
         ];
+    }
+
+
+    public function satuanDasar(): BelongsTo
+    {
+        return $this->belongsTo(Satuan::class, 'satuan_dasar_id');
     }
 }
