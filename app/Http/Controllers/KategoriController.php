@@ -23,6 +23,7 @@ class KategoriController extends Controller
             ->when($search !== '', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
             ->orderBy('nama')
             ->paginate(10)
+            ->withPath(route('categories.index'))
             ->withQueryString();
 
         $data = compact('categories', 'search', 'trash') + ['navigation' => $this->navigation()];
@@ -164,7 +165,11 @@ class KategoriController extends Controller
                 ->when($search !== '', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
                 ->orderBy('nama')
                 ->paginate(10)
-                ->withQueryString();
+                ->withPath(route('categories.index'))
+                ->appends(array_filter([
+                    'status' => $trash ? 'trash' : null,
+                    'search' => $search !== '' ? $search : null,
+                ]));
 
             return response()->json([
                 'message' => $message,
