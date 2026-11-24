@@ -91,7 +91,7 @@ class KategoriController extends Controller
     {
         $kategori = Kategori::onlyTrashed()->findOrFail($id);
 
-        if ($kategori->produk()->exists()) {
+        if ($kategori->produk()->withTrashed()->exists()) {
             return back()->with('success', 'Kategori tidak dapat dihapus permanen karena masih digunakan oleh produk.');
         }
 
@@ -121,7 +121,7 @@ class KategoriController extends Controller
                     $category->restore();
                     $count++;
                 } elseif ($validated['action'] === 'force_delete' && $category->trashed()) {
-                    if ($category->produk()->exists()) {
+                    if ($category->produk()->withTrashed()->exists()) {
                         $blocked++;
                         continue;
                     }
