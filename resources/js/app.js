@@ -230,7 +230,7 @@ const ajaxCategoryForm = async (form) => {
     const context = categoryContext();
     data.set("status", context.status);
     data.set("search", context.search);
-    const response = await fetch(form.action, {
+    const response = await fetch(form.getAttribute("action"), {
         method: "POST",
         body: data,
         headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
