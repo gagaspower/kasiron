@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+    "id": "/",
+    "name": "KasirOn - Sistem Kasir",
+    "short_name": "KasirOn",
+    "description": "Kelola transaksi, produk, dan ringkasan penjualan toko dengan KasirOn.",
+    "lang": "id",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#f6f7f9",
+    "background_color": "#f6f7f9",
+    "icons": [
+        {
+            "src": "/pwa-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/pwa-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/pwa-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
