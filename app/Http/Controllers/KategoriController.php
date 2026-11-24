@@ -25,12 +25,16 @@ class KategoriController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('products.categories.index', [
-            'categories' => $categories,
-            'search' => $search,
-            'trash' => $trash,
-            'navigation' => $this->navigation(),
-        ]);
+        $data = compact('categories', 'search', 'trash') + ['navigation' => $this->navigation()];
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'html' => view('products.categories.partials.results', $data)->render(),
+                'url' => $request->fullUrl(),
+            ]);
+        }
+
+        return view('products.categories.index', $data);
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,13 +44,15 @@ class KategoriController extends Controller
         ], ['nama.required' => 'Nama kategori wajib diisi.', 'nama.unique' => 'Nama kategori sudah digunakan.']);
 
         if ($validator->fails()) {
+            if ($request->expectsJson()) return response()->json(['message' => 'Periksa kembali data yang dimasukkan.', 'errors' => $validator->errors()], 422);
+
             return redirect()->route('categories.index')->withErrors($validator)->withInput()
                 ->with('category_form_action', route('categories.store'));
         }
 
         Kategori::create(['nama' => $validator->validated()['nama'], 'aktif' => true]);
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return $this->respondAfterMutation($request, 'Kategori berhasil ditambahkan.');
     }
 
     public function update(Request $request, Kategori $kategori): RedirectResponse
@@ -56,6 +62,8 @@ class KategoriController extends Controller
         ], ['nama.required' => 'Nama kategori wajib diisi.', 'nama.unique' => 'Nama kategori sudah digunakan.']);
 
         if ($validator->fails()) {
+            if ($request->expectsJson()) return response()->json(['message' => 'Periksa kembali data yang dimasukkan.', 'errors' => $validator->errors()], 422);
+
             return redirect()->route('categories.index')->withErrors($validator)->withInput()
                 ->with('category_form_action', route('categories.update', $kategori))
                 ->with('category_form_method', 'PUT');
@@ -63,41 +71,42 @@ class KategoriController extends Controller
 
         $kategori->update(['nama' => $validator->validated()['nama']]);
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil diperbarui.');
+        return $this->respondAfterMutation($request, 'Kategori berhasil diperbarui.');
     }
 
-    public function toggleStatus(Kategori $kategori): RedirectResponse
+    public function toggleStatus(Request $request, Kategori $kategori): RedirectResponse
     {
         $kategori->update(['aktif' => ! $kategori->aktif]);
 
-        return back()->with('success', 'Status kategori berhasil diperbarui.');
+        return $this->respondAfterMutation($request, 'Status kategori berhasil diperbarui.');
     }
 
-    public function destroy(Kategori $kategori): RedirectResponse
+    public function destroy(Request $request, Kategori $kategori): RedirectResponse
     {
         $kategori->delete();
 
-        return back()->with('success', 'Kategori dipindahkan ke sampah.');
+        return $this->respondAfterMutation($request, 'Kategori dipindahkan ke sampah.');
     }
 
-    public function restore(string $id): RedirectResponse
+    public function restore(Request $request, string $id): RedirectResponse
     {
         Kategori::onlyTrashed()->findOrFail($id)->restore();
 
-        return back()->with('success', 'Kategori berhasil dipulihkan.');
+        return $this->respondAfterMutation($request, 'Kategori berhasil dipulihkan.');
     }
 
-    public function forceDelete(string $id): RedirectResponse
+    public function forceDelete(Request $request, string $id): RedirectResponse
     {
         $kategori = Kategori::onlyTrashed()->findOrFail($id);
 
         if ($kategori->produk()->withTrashed()->exists()) {
+            if ($request->expectsJson()) return response()->json(['message' => 'Kategori masih digunakan oleh produk.'], 422);
             return back()->with('success', 'Kategori tidak dapat dihapus permanen karena masih digunakan oleh produk.');
         }
 
         $kategori->forceDelete();
 
-        return back()->with('success', 'Kategori berhasil dihapus permanen.');
+        return $this->respondAfterMutation($request, 'Kategori berhasil dihapus permanen.');
     }
 
     public function bulkAction(Request $request): RedirectResponse
@@ -140,6 +149,27 @@ class KategoriController extends Controller
 
         if ($blocked > 0) {
             $message .= " {$blocked} kategori tidak dapat dihapus karena masih digunakan oleh produk.";
+        }
+
+        return $this->respondAfterMutation($request, $message);
+    }
+
+    private function respondAfterMutation(Request $request, string $message): RedirectResponse|\\Illuminate\\Http\\JsonResponse
+    {
+        if ($request->expectsJson()) {
+            $trash = $request->input('status', $request->query('status')) === 'trash';
+            $search = trim((string) $request->input('search', $request->query('search', '')));
+            $categories = Kategori::query()
+                ->when($trash, fn (Builder $query) => $query->onlyTrashed())
+                ->when($search !== '', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
+                ->orderBy('nama')
+                ->paginate(10)
+                ->withQueryString();
+
+            return response()->json([
+                'message' => $message,
+                'html' => view('products.categories.partials.results', compact('categories', 'search', 'trash'))->render(),
+            ]);
         }
 
         return back()->with('success', $message);
