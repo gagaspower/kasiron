@@ -99,7 +99,7 @@
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">Hapus permanen</button>
                                             </form>
                                         @else
-                                            <button type="button" data-category-edit data-id="{{ $category->id }}" data-name="{{ $category->nama }}" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Edit</button>
+                                            <button type="button" data-category-edit data-id="{{ $category->id }}" data-url="{{ route('categories.update', $category) }}" data-name="{{ $category->nama }}" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Edit</button>
                                             <form method="POST" action="{{ route('categories.toggle-status', $category) }}">@csrf @method('PATCH')
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100">{{ $category->aktif ? 'Nonaktifkan' : 'Aktifkan' }}</button>
                                             </form>
