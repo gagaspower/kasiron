@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('categories.bulk-action') }}" data-bulk-form data-category-ajax-form>
+        <form id="category-bulk-form" method="POST" action="{{ route('categories.bulk-action') }}" data-bulk-form data-category-ajax-form>
             @csrf
             <input type="hidden" name="action" value="{{ $trash ? 'restore' : 'trash' }}" data-bulk-action>
             <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -33,8 +33,9 @@
                     @endif
                 </div>
             </div>
+        </form>
 
-            <div class="overflow-x-auto">
+        <div class="overflow-x-auto">
                 <table class="w-full min-w-[650px] text-left text-sm">
                     <thead class="bg-white text-xs font-semibold uppercase tracking-wider text-slate-400">
                         <tr>
@@ -48,7 +49,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse($categories as $category)
                             <tr class="transition hover:bg-slate-50/70">
-                                <td class="px-5 py-4"><input type="checkbox" name="ids[]" value="{{ $category->id }}" data-row-checkbox class="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"></td>
+                                <td class="px-5 py-4"><input type="checkbox" form="category-bulk-form" name="ids[]" value="{{ $category->id }}" data-row-checkbox class="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"></td>
                                 <td class="px-3 py-4"><span class="font-semibold text-slate-800">{{ $category->nama }}</span></td>
                                 <td class="px-3 py-4">
                                     @if($trash)
@@ -94,5 +95,4 @@
                 <p class="text-xs text-slate-500">Menampilkan {{ $categories->firstItem() ?? 0 }}–{{ $categories->lastItem() ?? 0 }} dari {{ $categories->total() }} kategori</p>
                 {{ $categories->onEachSide(1)->links('pagination::tailwind') }}
             </div>
-        </form>
     </section>
