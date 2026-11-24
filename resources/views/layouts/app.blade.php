@@ -19,5 +19,6 @@
         @include('partials.dashboard.navbar', ['navigation' => $navigation])
 
         @yield('content')
+        @yield('script')
     </body>
 </html>
