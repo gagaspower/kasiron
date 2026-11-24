@@ -18,7 +18,7 @@ class DashboardController extends Controller
                         ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
                     ],
                 ],
-                ['label' => 'Manajemen Produk', 'href' => '#produk', 'active' => false],
+                ['label' => 'Manajemen Produk', 'href' => route('products.index'), 'active' => false],
                 // [
                 //     'label' => 'Produk',
                 //     'children' => [
