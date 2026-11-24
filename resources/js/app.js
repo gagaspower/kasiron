@@ -333,7 +333,7 @@ document.addEventListener("click", async (event) => {
 
     const selectAll = event.target.closest("[data-select-all]");
     if (selectAll) {
-        selectAll.closest("form").querySelectorAll("[data-row-checkbox]").forEach((checkbox) => {
+        document.querySelectorAll("[data-row-checkbox]").forEach((checkbox) => {
             checkbox.checked = selectAll.checked;
         });
     }
@@ -341,9 +341,8 @@ document.addEventListener("click", async (event) => {
 
 document.addEventListener("change", (event) => {
     if (event.target.matches("[data-row-checkbox]")) {
-        const form = event.target.closest("form");
-        const boxes = [...form.querySelectorAll("[data-row-checkbox]")];
-        const selectAll = form.querySelector("[data-select-all]");
+        const boxes = [...document.querySelectorAll("[data-row-checkbox]")];
+        const selectAll = document.querySelector("[data-select-all]");
         if (selectAll) selectAll.checked = boxes.length > 0 && boxes.every((box) => box.checked);
     }
 });
