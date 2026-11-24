@@ -154,7 +154,7 @@ class KategoriController extends Controller
         return $this->respondAfterMutation($request, $message);
     }
 
-    private function respondAfterMutation(Request $request, string $message): RedirectResponse|\\Illuminate\\Http\\JsonResponse
+    private function respondAfterMutation(Request $request, string $message)
     {
         if ($request->expectsJson()) {
             $trash = $request->input('status', $request->query('status')) === 'trash';
