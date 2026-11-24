@@ -18,13 +18,14 @@ class DashboardController extends Controller
                         ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
                     ],
                 ],
-                [
-                    'label' => 'Produk',
-                    'children' => [
-                        ['label' => 'Produk terlaris', 'href' => '#produk'],
-                        ['label' => 'Stok menipis', 'href' => '#produk'],
-                    ],
-                ],
+                ['label' => 'Manajemen Produk', 'href' => '#produk', 'active' => false],
+                // [
+                //     'label' => 'Produk',
+                //     'children' => [
+                //         ['label' => 'Produk terlaris', 'href' => '#produk'],
+                //         ['label' => 'Stok menipis', 'href' => '#produk'],
+                //     ],
+                // ],
                 [
                     'label' => 'Laporan',
                     'children' => [

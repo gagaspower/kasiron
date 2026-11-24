@@ -54,8 +54,8 @@ class Produk extends Model
     protected function casts(): array
     {
         return [
-            'jumlah_stok' => 'integer',
-            'stok_minimum' => 'integer',
+            'jumlah_stok' => 'decimal:6',
+            'stok_minimum' => 'decimal:6',
             'aktif' => 'boolean',
         ];
     }

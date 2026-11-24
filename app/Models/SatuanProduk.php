@@ -44,7 +44,7 @@ class SatuanProduk extends Model
     protected function casts(): array
     {
         return [
-            'konversi_ke_satuan_dasar' => 'integer',
+            'konversi_ke_satuan_dasar' => 'decimal:6',
             'presisi_kuantitas' => 'integer',
             'harga_jual' => 'integer',
             'satuan_utama' => 'boolean',
