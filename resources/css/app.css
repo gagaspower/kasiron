@@ -15,6 +15,7 @@
             radial-gradient(ellipse at 88% 0%, rgb(59 130 246 / 7%), transparent 28rem),
             radial-gradient(ellipse at 8% 28%, rgb(14 165 233 / 4%), transparent 24rem);
         background-attachment: fixed;
+        font-feature-settings: 'cv11' 1;
     }
 
     [data-pwa-install][hidden] {

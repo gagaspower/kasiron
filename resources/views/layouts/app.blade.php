@@ -12,6 +12,7 @@
         <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('pwa-192x192.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
         <title>@yield('title', 'Dashboard | KasirOn')</title>
+        @fonts('inter')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen font-sans text-slate-900 antialiased">
