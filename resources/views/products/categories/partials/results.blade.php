@@ -5,7 +5,7 @@
                 <p class="mt-1 text-xs text-slate-500">{{ $categories->total() }} data ditemukan</p>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
-                <form method="GET" action="{{ route('categories.index') }}" class="relative">
+                <form method="GET" action="{{ route('categories.index') }}" class="relative" data-category-search-form>
                     <input type="hidden" name="status" value="{{ $trash ? 'trash' : 'active' }}">
                     <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                     <input type="search" name="search" value="{{ $search }}" placeholder="Cari kategori..." autocomplete="off" data-category-search class="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-9 text-sm outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 sm:w-64"><button type="button" data-category-search-clear aria-label="Hapus pencarian" class="{{ $search !== '' ? '' : 'hidden' }} absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('categories.bulk-action') }}" data-bulk-form>
+        <form method="POST" action="{{ route('categories.bulk-action') }}" data-bulk-form data-category-ajax-form>
             @csrf
             <input type="hidden" name="action" value="{{ $trash ? 'restore' : 'trash' }}" data-bulk-action>
             <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -63,18 +63,18 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center justify-end gap-1">
                                         @if($trash)
-                                            <form method="POST" action="{{ route('categories.restore', $category->id) }}">@csrf @method('PATCH')
+                                            <form method="POST" action="{{ route('categories.restore', $category->id) }}" data-category-ajax-form>@csrf @method('PATCH')
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Pulihkan</button>
                                             </form>
-                                            <form method="POST" action="{{ route('categories.force-delete', $category->id) }}" data-confirm="Hapus permanen kategori ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')
+                                            <form method="POST" action="{{ route('categories.force-delete', $category->id) }}" data-category-ajax-form data-confirm="Hapus permanen kategori ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">Hapus permanen</button>
                                             </form>
                                         @else
                                             <button type="button" data-category-edit data-id="{{ $category->id }}" data-url="{{ route('categories.update', $category) }}" data-name="{{ $category->nama }}" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Edit</button>
-                                            <form method="POST" action="{{ route('categories.toggle-status', $category) }}">@csrf @method('PATCH')
+                                            <form method="POST" action="{{ route('categories.toggle-status', $category) }}" data-category-ajax-form>@csrf @method('PATCH')
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100">{{ $category->aktif ? 'Nonaktifkan' : 'Aktifkan' }}</button>
                                             </form>
-                                            <form method="POST" action="{{ route('categories.destroy', $category) }}" data-confirm="Pindahkan kategori ini ke sampah?">@csrf @method('DELETE')
+                                            <form method="POST" action="{{ route('categories.destroy', $category) }}" data-category-ajax-form data-confirm="Pindahkan kategori ini ke sampah?">@csrf @method('DELETE')
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">Ke sampah</button>
                                             </form>
                                         @endif
