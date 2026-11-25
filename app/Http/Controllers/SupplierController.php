@@ -197,7 +197,11 @@ class SupplierController extends Controller
                 ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
                 ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
             ]],
-            ['label' => 'Manajemen Produk', 'href' => route('products.index'), 'active' => true],
+            ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
+                ['label' => 'Master', 'href' => route('products.index')],
+                ['label' => 'Pembelian', 'disabled' => true, 'status' => 'Segera'],
+                ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
+            ]],
             ['label' => 'Laporan', 'children' => [
                 ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
                 ['label' => 'Pembayaran', 'href' => '#ringkasan'],
