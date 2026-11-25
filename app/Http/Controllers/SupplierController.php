@@ -211,15 +211,15 @@ class SupplierController extends Controller
     private function navigation(): array
     {
         return [
-            ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => false],
+            ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => request()->routeIs('dashboard')],
             ['label' => 'Transaksi', 'children' => [
                 ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
                 ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
             ]],
-            ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
-                ['label' => 'Master', 'href' => route('products.index')],
+            ['label' => 'Manajemen Toko', 'active' => request()->routeIs('products.*', 'products-master.*', 'categories.*', 'units.*', 'suppliers.*', 'purchases.*', 'inventory.*'), 'children' => [
+                ['label' => 'Master', 'href' => route('products.index'), 'active' => request()->routeIs('products.index', 'products-master.*', 'categories.*', 'units.*', 'suppliers.*')],
                 ['label' => 'Pembelian', 'href' => route('purchases.index'), 'active' => request()->routeIs('purchases.*')],
-                ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
+                ['label' => 'Persediaan', 'href' => route('inventory.index'), 'active' => request()->routeIs('inventory.*')],
             ]],
             ['label' => 'Laporan', 'children' => [
                 ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
