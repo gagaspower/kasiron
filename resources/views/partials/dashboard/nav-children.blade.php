@@ -5,7 +5,7 @@
             <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-300">{{ $child['status'] ?? 'Segera' }}</span>
         </div>
     @elseif (isset($child['children']))
-        <details data-dropdown class="group {{ $mobile ? '' : 'relative' }}">
+        <details data-dropdown class="group {{ $mobile ? '' : 'relative' }}" @if ($child['active'] ?? false) open @endif>
             <summary class="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition [&::-webkit-details-marker]:hidden {{ ($child['active'] ?? false) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700' }}">
                 {{ $child['label'] }}
                 <svg class="size-3.5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true">
