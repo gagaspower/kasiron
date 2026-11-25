@@ -6,6 +6,7 @@ use App\Models\MutasiStok;
 use App\Models\Pembelian;
 use App\Models\PenerimaanPembelian;
 use App\Models\Produk;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,9 @@ class PenerimaanPembelianController extends Controller
     public function index(Request $request): View
     {
         $search = trim($request->string('search')->value());
+        $tanggalMulai = $request->string('tanggal_mulai')->value();
+        $tanggalSelesai = $request->string('tanggal_selesai')->value();
+        $supplierId = $request->string('supplier_id')->value();
 
         $pembelians = Pembelian::query()
             ->with(['supplier', 'detail.penerimaanDetail' => fn ($query) => $query->whereHas('penerimaan', fn ($receipt) => $receipt->where('status', PenerimaanPembelian::STATUS_DITERIMA))])
@@ -27,19 +31,25 @@ class PenerimaanPembelianController extends Controller
                     ->orWhereHas('supplier', fn (Builder $supplier) => $supplier->where('nama', 'like', "%{$search}%"));
             }))
             ->latest('tanggal_pembelian')
-            ->get()
-            ->map(function (Pembelian $pembelian) {
-                $pembelian->detail->each(function ($detail) {
-                    $detail->jumlah_sudah_diterima = (float) $detail->penerimaanDetail->sum('jumlah_diterima');
-                    $detail->jumlah_sisa = max(0, (float) $detail->jumlah - $detail->jumlah_sudah_diterima);
-                });
-                $pembelian->total_sisa_item = $pembelian->detail->filter(fn ($detail) => $detail->jumlah_sisa > 0)->count();
-                $pembelian->total_sisa_qty = $pembelian->detail->sum('jumlah_sisa');
-                return $pembelian;
+            ->paginate(10, ['*'], 'menunggu_page')
+            ->withQueryString();
+
+        $pembelians->through(function (Pembelian $pembelian) {
+            $pembelian->detail->each(function ($detail) {
+                $detail->jumlah_sudah_diterima = (float) $detail->penerimaanDetail->sum('jumlah_diterima');
+                $detail->jumlah_sisa = max(0, (float) $detail->jumlah - $detail->jumlah_sudah_diterima);
             });
+            $pembelian->total_sisa_item = $pembelian->detail->filter(fn ($detail) => $detail->jumlah_sisa > 0)->count();
+            $pembelian->total_sisa_qty = $pembelian->detail->sum('jumlah_sisa');
+
+            return $pembelian;
+        });
 
         $riwayat = PenerimaanPembelian::query()
             ->with(['pembelian.supplier', 'dibuatOleh', 'diterimaOleh'])
+            ->when($tanggalMulai !== '', fn (Builder $query) => $query->whereDate('tanggal_penerimaan', '>=', $tanggalMulai))
+            ->when($tanggalSelesai !== '', fn (Builder $query) => $query->whereDate('tanggal_penerimaan', '<=', $tanggalSelesai))
+            ->when($supplierId !== '', fn (Builder $query) => $query->whereHas('pembelian', fn (Builder $purchase) => $purchase->where('supplier_id', $supplierId)))
             ->latest('tanggal_penerimaan')
             ->paginate(10, ['*'], 'riwayat_page')
             ->withQueryString();
@@ -48,6 +58,10 @@ class PenerimaanPembelianController extends Controller
             'pembelians' => $pembelians,
             'riwayat' => $riwayat,
             'search' => $search,
+            'tanggalMulai' => $tanggalMulai,
+            'tanggalSelesai' => $tanggalSelesai,
+            'supplierId' => $supplierId,
+            'suppliers' => Supplier::query()->orderBy('nama')->get(['id', 'nama']),
             'navigation' => app(PembelianController::class)->navigationForView(),
         ]);
     }
