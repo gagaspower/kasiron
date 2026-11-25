@@ -7,7 +7,7 @@
         <a href="{{ route('purchases.index') }}" class="text-sm font-medium text-slate-500 hover:text-emerald-700">← Daftar Pembelian</a>
         <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div><p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/80">Detail transaksi pembelian</p><h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ $pembelian->nomor_pembelian }}</h1><p class="mt-2 text-sm text-slate-500">Tanggal {{ $pembelian->tanggal_pembelian?->format('d M Y') }}</p></div>
-            <span class="inline-flex w-fit rounded-full bg-{{ $pembelian->status === 'draft' ? 'amber' : 'emerald' }}-50 px-3 py-1.5 text-xs font-semibold text-{{ $pembelian->status === 'draft' ? 'amber' : 'emerald' }}-700">{{ str_replace('_', ' ', ucfirst($pembelian->status)) }}</span>
+            <span class="inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-semibold {{ $pembelian->status === 'draft' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700' }}">{{ str_replace('_', ' ', ucfirst($pembelian->status)) }}</span>
         </div>
     </div>
     @if(session('success'))<div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
