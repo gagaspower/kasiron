@@ -14,7 +14,14 @@ use Illuminate\View\View;
 
 class PembelianController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
+    {
+        return view('purchases.index', [
+            'navigation' => $this->navigation(),
+        ]);
+    }
+
+    public function transactions(Request $request): View
     {
         $search = trim($request->string('search')->value());
         $status = $request->string('status')->value();
