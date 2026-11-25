@@ -7,6 +7,54 @@ let resolveConfirmation = null;
 const money = value => new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(value) || 0);
 const field = (row, name) => row.querySelector(`[data-field="${name}"]`);
 
+const parseMoney = value => {
+    const digits = String(value ?? "").replace(/[^0-9]/g, "");
+    return digits === "" ? "" : String(Number(digits));
+};
+
+const formatMoneyInput = value => {
+    const raw = parseMoney(value);
+    return raw === "" ? "" : money(raw);
+};
+
+const bindMoneyInput = (displayInput, rawInput) => {
+    const syncRaw = () => {
+        rawInput.value = parseMoney(displayInput.value);
+    };
+
+    displayInput.addEventListener("focus", () => {
+        const raw = parseMoney(displayInput.value);
+        displayInput.value = raw === "0" ? "" : raw;
+        displayInput.select();
+    });
+
+    displayInput.addEventListener("input", () => {
+        const cursorAtEnd = displayInput.selectionStart === displayInput.value.length;
+        const previousLength = displayInput.value.length;
+        displayInput.value = displayInput.value.replace(/[^0-9]/g, "");
+        syncRaw();
+        if (cursorAtEnd) displayInput.setSelectionRange(displayInput.value.length, displayInput.value.length);
+    });
+
+    displayInput.addEventListener("blur", () => {
+        syncRaw();
+        displayInput.value = formatMoneyInput(rawInput.value || "0");
+    });
+
+    displayInput.value = formatMoneyInput(rawInput.value || displayInput.value || "0");
+    syncRaw();
+};
+
+const bindMoneyInputs = root => {
+    root.querySelectorAll("[data-money-display]").forEach(displayInput => {
+        if (displayInput.dataset.moneyBound === "true") return;
+        const rawInput = displayInput.previousElementSibling;
+        if (!rawInput || rawInput.type !== "hidden") return;
+        displayInput.dataset.moneyBound = "true";
+        bindMoneyInput(displayInput, rawInput);
+    });
+};
+
 const pickerRequests = new WeakMap();
 
 const closePicker = (box, input) => {
@@ -184,9 +232,13 @@ const addRow = (values = {}) => {
             if (values.satuan_produk_id) field(row, "satuan_produk_id").value = values.satuan_produk_id;
         }).catch(() => {});
     }
-    ["jumlah", "harga_beli", "diskon", "catatan"].forEach(name => {
+    ["jumlah", "catatan"].forEach(name => {
         if (values[name] !== undefined && values[name] !== null) field(row, name).value = values[name];
     });
+    ["harga_beli", "diskon"].forEach(name => {
+        if (values[name] !== undefined && values[name] !== null) field(row, name).value = values[name];
+    });
+    bindMoneyInputs(row);
     renumber();
     calculate();
 };
@@ -196,6 +248,8 @@ if (form) {
     if (initialRows.length) initialRows.forEach(addRow);
     else addRow();
     form.querySelector("[data-purchase-add-row]").addEventListener("click", () => addRow());
+    bindMoneyInputs(form);
+    form.querySelectorAll("[data-money-display]").forEach(input => input.addEventListener("input", calculate));
     form.querySelector("[data-purchase-discount]").addEventListener("input", calculate);
     form.querySelector("[data-purchase-extra]").addEventListener("input", calculate);
 
@@ -203,7 +257,7 @@ if (form) {
         if (event.target.matches('[data-field="satuan_produk_id"]')) calculate();
     });
     rowsContainer.addEventListener("input", event => {
-        if (event.target.matches('[data-field="jumlah"], [data-field="harga_beli"], [data-field="diskon"]')) calculate();
+        if (event.target.matches('[data-field="jumlah"], [data-money-display]')) calculate();
     });
     rowsContainer.addEventListener("click", event => {
         const remove = event.target.closest("[data-purchase-remove-row]");
@@ -218,6 +272,10 @@ if (form) {
             field(row, "jumlah").value = "1";
             field(row, "harga_beli").value = "0";
             field(row, "diskon").value = "0";
+            row.querySelectorAll("[data-money-display]").forEach(input => {
+                input.value = "0";
+                input.dispatchEvent(new Event("blur"));
+            });
         } else row.remove();
         renumber();
         calculate();
