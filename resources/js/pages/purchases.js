@@ -36,11 +36,12 @@ const renderPickerOptions = (box, input, items, emptyText, choose) => {
     input.setAttribute("aria-expanded", "true");
 };
 
-const fetchOptions = async (picker, query) => {
+const fetchOptions = async (picker, query, selectedId = "") => {
     const requestId = (pickerRequests.get(picker) || 0) + 1;
     pickerRequests.set(picker, requestId);
     const url = new URL(picker.dataset.optionsUrl, window.location.origin);
-    if (query.trim()) url.searchParams.set("q", query.trim());
+    if (selectedId) url.searchParams.set("id", selectedId);
+    else if (query.trim()) url.searchParams.set("q", query.trim());
     const response = await fetch(url, { headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" } });
     if (!response.ok) throw new Error("Gagal memuat pilihan.");
     const payload = await response.json();
@@ -172,7 +173,7 @@ const addRow = (values = {}) => {
     });
     row._productPicker = { search: pickerApi.search };
     if (values.produk_id) {
-        fetchOptions(picker, "").then(items => {
+        fetchOptions(picker, "", values.produk_id).then(items => {
             const selected = items?.find(item => item.id === values.produk_id);
             if (selected) chooseProduct(selected);
             else {
