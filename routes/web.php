@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelian/{pembelian}/penerimaan/tambah', [PenerimaanPembelianController::class, 'create'])->name('purchases.receipts.create');
     Route::post('/pembelian/{pembelian}/penerimaan', [PenerimaanPembelianController::class, 'store'])->name('purchases.receipts.store');
     Route::get('/penerimaan/{penerimaan}', [PenerimaanPembelianController::class, 'show'])->name('purchases.receipts.show');
+    Route::get('/penerimaan/{penerimaan}/revisi', [PenerimaanPembelianController::class, 'edit'])->name('purchases.receipts.edit');
+    Route::put('/penerimaan/{penerimaan}', [PenerimaanPembelianController::class, 'update'])->name('purchases.receipts.update');
+    Route::patch('/penerimaan/{penerimaan}/batalkan', [PenerimaanPembelianController::class, 'cancel'])->name('purchases.receipts.cancel');
     Route::patch('/penerimaan/{penerimaan}/konfirmasi', [PenerimaanPembelianController::class, 'confirm'])->name('purchases.receipts.confirm');
     Route::get('/pembelian/pembayaran', fn () => view('purchases.payments', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.payments.index');
     Route::get('/pembelian/tambah', [PembelianController::class, 'create'])->name('purchases.create');
