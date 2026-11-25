@@ -6,7 +6,7 @@ const categoryMethod = document.querySelector("[data-category-method]");
 const categoryTitle = document.querySelector("[data-category-modal-title]");
 const categoryResults = document.querySelector("[data-category-results]");
 const categoryStoreUrl = categoryForm?.action;
-let categorySearchTimer;
+let categorySearchTimer;\nlet categoryLoadingOverlay = null;
 let resolveCategoryConfirmation = null;
 const confirmationModal = document.querySelector('[data-category-confirm-modal]');
 const confirmationMessage = document.querySelector('[data-category-confirm-message]');
@@ -18,6 +18,30 @@ const categoryContext = () => {
         search: params.get("search") || "",
         page: params.get("page") || "1",
     };
+};
+
+const setCategoryLoading = (loading) => {
+    if (!categoryResults) return;
+
+    if (loading) {
+        if (categoryLoadingOverlay) return;
+        categoryResults.classList.add("relative", "min-h-[160px]");
+        categoryResults.setAttribute("aria-busy", "true");
+
+        categoryLoadingOverlay = document.createElement("div");
+        categoryLoadingOverlay.className = "absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-[1px]";
+        categoryLoadingOverlay.innerHTML = `
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm">
+                <span class="size-5 animate-spin rounded-full border-2 border-blue-100 border-t-blue-600" aria-hidden="true"></span>
+                <span>Memuat data...</span>
+            </div>`;
+        categoryResults.append(categoryLoadingOverlay);
+        return;
+    }
+
+    categoryLoadingOverlay?.remove();
+    categoryLoadingOverlay = null;
+    categoryResults.removeAttribute("aria-busy");
 };
 
 const showCategoryNotice = (message, isError = false) => {
@@ -42,13 +66,19 @@ const refreshCategoryResults = async (url = window.location.href, options = {}) 
         ? [document.activeElement.selectionStart, document.activeElement.selectionEnd]
         : null;
 
-    const response = await fetch(target, {
-        headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
-        ...options,
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.message || "Tidak dapat memuat data kategori.");
-    categoryResults.innerHTML = payload.html;
+    setCategoryLoading(true);
+    let payload;
+    try {
+        const response = await fetch(target, {
+            headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
+            ...options,
+        });
+        payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || "Tidak dapat memuat data kategori.");
+        categoryResults.innerHTML = payload.html;
+    } finally {
+        setCategoryLoading(false);
+    }
 
     // Re-focus the newly rendered search field so typing can continue uninterrupted.
     if (focusedSearch) {
@@ -69,12 +99,21 @@ const ajaxCategoryForm = async (form) => {
     data.set("status", context.status);
     data.set("search", context.search);
     data.set("page", context.page);
-    const response = await fetch(form.getAttribute("action"), {
-        method: "POST",
-        body: data,
-        headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
-    });
-    const payload = await response.json();
+    setCategoryLoading(true);
+    let payload;
+    try {
+        const response = await fetch(form.getAttribute("action"), {
+            method: "POST",
+            body: data,
+            headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
+        });
+        payload = await response.json();
+        if (!response.ok && response.status !== 422) {
+            throw new Error(payload.message || "Aksi kategori gagal.");
+        }
+    } finally {
+        setCategoryLoading(false);
+    }
     if (response.status === 422) {
         if (categoryModal?.open) {
             const error = payload.errors?.nama?.[0] || payload.message;
@@ -91,7 +130,6 @@ const ajaxCategoryForm = async (form) => {
         }
         return;
     }
-    if (!response.ok) throw new Error(payload.message || "Aksi kategori gagal.");
     if (payload.html) categoryResults.innerHTML = payload.html;
     if (categoryModal?.open) categoryModal.close();
     showCategoryNotice(payload.message || "Data kategori berhasil diperbarui.");
@@ -223,7 +261,17 @@ document.addEventListener("click", async (event) => {
     }
 });
 
-document.addEventListener("change", (event) => {
+document.addEventListener("change", async (event) => {
+    if (event.target.matches("[data-category-status-filter]")) {
+        const url = new URL(categoryForm?.action || window.location.pathname, window.location.origin);
+        url.searchParams.set("status", event.target.value);
+        url.searchParams.delete("search");
+        url.searchParams.delete("page");
+        try { await refreshCategoryResults(url); }
+        catch (error) { showCategoryNotice(error.message, true); }
+        return;
+    }
+
     if (event.target.matches("[data-row-checkbox]")) {
         const boxes = [...document.querySelectorAll("[data-row-checkbox]")];
         const selectAll = document.querySelector("[data-select-all]");
