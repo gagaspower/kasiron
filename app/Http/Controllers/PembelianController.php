@@ -247,6 +247,36 @@ class PembelianController extends Controller
         }
     }
 
+    public function productSearch(Request $request)
+    {
+        $search = trim($request->string('q')->value());
+
+        $products = Produk::query()
+            ->where('aktif', true)
+            ->whereNull('deleted_at')
+            ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($search) {
+                $query->where('nama', 'like', "%{$search}%")
+                    ->orWhere('kode_sku', 'like', "%{$search}%")
+                    ->orWhereHas('satuanProduk', fn (Builder $unit) => $unit->where('barcode', 'like', "%{$search}%"));
+            }))
+            ->with(['satuanProduk' => fn ($query) => $query->where('aktif', true)->whereNull('deleted_at')->with('satuan')])
+            ->orderBy('nama')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'results' => $products->map(fn ($product) => [
+                'id' => $product->id,
+                'text' => $product->nama . ($product->kode_sku ? ' · ' . $product->kode_sku : ''),
+                'units' => $product->satuanProduk->map(fn ($unit) => [
+                    'id' => $unit->id,
+                    'nama' => $unit->satuan?->nama ?? '-',
+                    'konversi' => (float) $unit->konversi_ke_satuan_dasar,
+                ])->values(),
+            ])->values(),
+        ]);
+    }
+
     private function productOptions(?Pembelian $pembelian = null): array
     {
         $products = Produk::query()
