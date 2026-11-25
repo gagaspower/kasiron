@@ -14,7 +14,7 @@
             @foreach ($navigation as $item)
                 @if (isset($item['children']))
                     <details data-dropdown class="group relative">
-                        <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100/80 hover:text-slate-950 [&::-webkit-details-marker]:hidden">
+                        <summary class="{{ ($item['active'] ?? false) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-950' }} flex cursor-pointer list-none items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition [&::-webkit-details-marker]:hidden">
                             {{ $item['label'] }}
                             <svg class="size-3.5 text-slate-400 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                 <path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -23,9 +23,16 @@
                         <div class="absolute left-0 top-full z-40 mt-2 w-56 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-xl shadow-slate-900/10">
                             <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">{{ $item['label'] }}</p>
                             @foreach ($item['children'] as $child)
-                                <a href="{{ $child['href'] }}" class="block rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">
-                                    {{ $child['label'] }}
-                                </a>
+                                @if ($child['disabled'] ?? false)
+                                    <div class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400">
+                                        <span>{{ $child['label'] }}</span>
+                                        <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-300">{{ $child['status'] ?? 'Segera' }}</span>
+                                    </div>
+                                @else
+                                    <a href="{{ $child['href'] }}" class="block rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">
+                                        {{ $child['label'] }}
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     </details>
@@ -75,9 +82,16 @@
                             </summary>
                             <div class="ml-3 border-l border-slate-100 py-1 pl-2">
                                 @foreach ($item['children'] as $child)
-                                    <a href="{{ $child['href'] }}" class="block rounded-lg px-3 py-2.5 text-sm text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
-                                        {{ $child['label'] }}
-                                    </a>
+                                    @if ($child['disabled'] ?? false)
+                                        <div class="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-slate-400">
+                                            <span>{{ $child['label'] }}</span>
+                                            <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-300">{{ $child['status'] ?? 'Segera' }}</span>
+                                        </div>
+                                    @else
+                                        <a href="{{ $child['href'] }}" class="block rounded-lg px-3 py-2.5 text-sm text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+                                            {{ $child['label'] }}
+                                        </a>
+                                    @endif
                                 @endforeach
                             </div>
                         </details>
