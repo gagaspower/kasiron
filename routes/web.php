@@ -26,14 +26,10 @@ Route::middleware('auth')->group(function () {
                     ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
                 ]],
                 ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
-                ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'children' => [
-                    ['label' => 'Transaksi Pembelian', 'href' => route('purchases.transactions.index')],
-                    ['label' => 'Penerimaan Barang', 'href' => route('purchases.receipts.index')],
-                    ['label' => 'Pembayaran Pembelian', 'href' => route('purchases.payments.index')],
+                    ['label' => 'Master', 'href' => route('products.index'), 'active' => true],
+                    ['label' => 'Pembelian', 'href' => route('purchases.index')],
+                    ['label' => 'Persediaan', 'href' => route('inventory.index')],
                 ]],
-                ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
-            ]],
                 ['label' => 'Laporan', 'children' => [
                     ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
                     ['label' => 'Pembayaran', 'href' => '#ringkasan'],
@@ -44,6 +40,27 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/supplier/options', [SupplierController::class, 'options'])->name('suppliers.options');
     Route::get('/produk/options', [PembelianController::class, 'productSearch'])->name('purchases.products.options');
+
+    Route::get('/persediaan', function () {
+        return view('inventory.index', [
+            'navigation' => [
+                ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => false],
+                ['label' => 'Transaksi', 'children' => [
+                    ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
+                    ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
+                ]],
+                ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
+                    ['label' => 'Master', 'href' => route('products.index')],
+                    ['label' => 'Pembelian', 'href' => route('purchases.index')],
+                    ['label' => 'Persediaan', 'href' => route('inventory.index'), 'active' => true],
+                ]],
+                ['label' => 'Laporan', 'children' => [
+                    ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
+                    ['label' => 'Pembayaran', 'href' => '#ringkasan'],
+                ]],
+            ],
+        ]);
+    })->name('inventory.index');
 
     Route::get('/pembelian', [PembelianController::class, 'index'])->name('purchases.index');
     Route::get('/pembelian/transaksi', [PembelianController::class, 'transactions'])->name('purchases.transactions.index');
