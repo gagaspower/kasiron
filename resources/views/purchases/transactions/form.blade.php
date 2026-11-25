@@ -35,14 +35,14 @@
                     <div class="grid grid-cols-2 gap-2">
                         <label class="cursor-pointer">
                             <input type="radio" name="jenis_pembayaran" value="tunai" data-purchase-payment-type required @checked($jenisPembayaran === 'tunai') class="peer sr-only">
-                            <span class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                            <span class="flex items-center justify-start gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M7 15h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                                 Tunai
                             </span>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="jenis_pembayaran" value="kredit" data-purchase-payment-type required @checked($jenisPembayaran === 'kredit') class="peer sr-only">
-                            <span class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                            <span class="flex items-center justify-start gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 Kredit / Tempo
                             </span>
