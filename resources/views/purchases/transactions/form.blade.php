@@ -1,0 +1,64 @@
+@extends('layouts.products')
+
+@section('title', $formTitle.' | KasirOn')
+
+@section('product-content')
+    <div class="mb-7">
+        <a href="{{ route('purchases.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-emerald-700">← Daftar Pembelian</a>
+        <div class="mt-4"><p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/80">Transaksi pembelian</p><h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ $formTitle }}</h1><p class="mt-2 text-sm text-slate-500">Draft pembelian belum memengaruhi stok produk.</p></div>
+    </div>
+
+    @if($errors->any())
+        <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Periksa kembali data pembelian.</p><ul class="mt-2 list-inside list-disc">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    @endif
+
+    <form method="POST" action="{{ $formAction }}" class="space-y-6" data-purchase-form data-products='@json($productOptions)'>
+        @csrf
+        @if($formMethod !== 'POST')@method($formMethod)@endif
+        <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+            <div class="mb-5"><h2 class="font-semibold text-slate-900">Informasi Pembelian</h2><p class="mt-1 text-sm text-slate-500">Pilih supplier dan tanggal transaksi.</p></div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div><label class="mb-2 block text-sm font-medium text-slate-700">Supplier <span class="text-rose-500">*</span></label><select name="supplier_id" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"><option value="">Pilih supplier</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected(old('supplier_id', $pembelian->supplier_id) === $supplier->id)>{{ $supplier->nama }}</option>@endforeach</select></div>
+                <div><label class="mb-2 block text-sm font-medium text-slate-700">Nomor faktur supplier</label><input name="nomor_faktur_supplier" value="{{ old('nomor_faktur_supplier', $pembelian->nomor_faktur_supplier) }}" maxlength="100" placeholder="Opsional" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
+                <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal pembelian <span class="text-rose-500">*</span></label><input type="date" name="tanggal_pembelian" value="{{ old('tanggal_pembelian', $pembelian->tanggal_pembelian?->format('Y-m-d')) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
+                <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal jatuh tempo</label><input type="date" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $pembelian->tanggal_jatuh_tempo?->format('Y-m-d')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
+                <div class="md:col-span-2"><label class="mb-2 block text-sm font-medium text-slate-700">Catatan</label><textarea name="catatan" rows="2" maxlength="5000" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm" placeholder="Catatan pembelian (opsional)">{{ old('catatan', $pembelian->catatan) }}</textarea></div>
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 class="font-semibold text-slate-900">Rincian Produk</h2><p class="mt-1 text-sm text-slate-500">Pilih produk, satuan pembelian, jumlah, dan harga beli.</p></div><button type="button" data-purchase-add-row class="rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">+ Tambah Produk</button></div>
+            <div class="space-y-3" data-purchase-rows></div>
+            <template data-purchase-row-template>
+                <div class="rounded-xl border border-slate-200 p-4" data-purchase-row>
+                    <div class="mb-3 flex items-center justify-between"><span class="text-sm font-semibold text-slate-700">Item <span data-purchase-row-number></span></span><button type="button" data-purchase-remove-row class="rounded-lg p-2 text-rose-600 hover:bg-rose-50" title="Hapus item" aria-label="Hapus item"><svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="sm:col-span-2"><label class="mb-1.5 block text-xs font-medium text-slate-600">Produk</label><select data-field="produk_id" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="">Pilih produk</option></select></div>
+                        <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Satuan</label><select data-field="satuan_produk_id" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="">Pilih satuan</option></select></div>
+                        <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Jumlah</label><input data-field="jumlah" type="number" min="0.000001" step="0.000001" value="1" required class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></div>
+                        <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Harga beli / satuan (Rp)</label><input data-field="harga_beli" type="number" min="0" step="0.01" value="0" required class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></div>
+                        <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Diskon item (Rp)</label><input data-field="diskon" type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></div>
+                        <div class="sm:col-span-2"><label class="mb-1.5 block text-xs font-medium text-slate-600">Catatan item</label><input data-field="catatan" type="text" maxlength="1000" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm" placeholder="Opsional"></div>
+                    </div>
+                    <p class="mt-3 text-right text-sm font-semibold text-slate-700">Subtotal item: <span data-purchase-row-subtotal>Rp 0</span></p>
+                </div>
+            </template>
+            <div class="mt-5 border-t border-slate-100 pt-5">
+                <div class="ml-auto grid max-w-sm gap-3">
+                    <div class="flex justify-between text-sm"><span class="text-slate-500">Subtotal produk</span><strong data-purchase-subtotal>Rp 0</strong></div>
+                    <div class="flex items-center justify-between gap-4"><label for="purchase-discount" class="text-sm text-slate-600">Diskon transaksi (Rp)</label><input id="purchase-discount" name="diskon" type="number" min="0" step="0.01" value="{{ old('diskon', $pembelian->diskon ?? 0) }}" data-purchase-discount class="w-36 rounded-lg border border-slate-200 px-3 py-2 text-right text-sm"></div>
+                    <div class="flex items-center justify-between gap-4"><label for="purchase-extra" class="text-sm text-slate-600">Biaya lain (Rp)</label><input id="purchase-extra" name="biaya_lain" type="number" min="0" step="0.01" value="{{ old('biaya_lain', $pembelian->biaya_lain ?? 0) }}" data-purchase-extra class="w-36 rounded-lg border border-slate-200 px-3 py-2 text-right text-sm"></div>
+                    <div class="flex justify-between border-t border-slate-200 pt-3"><span class="font-semibold text-slate-800">Total Pembelian</span><strong data-purchase-total class="text-lg text-emerald-700">Rp 0</strong></div>
+                </div>
+            </div>
+        </section>
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><a href="{{ route('purchases.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</a><button type="submit" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">Simpan sebagai Draft</button></div>
+    </form>
+@endsection
+
+@section('script')
+    <script>
+        window.purchaseInitialRows = @json(old('detail', $pembelian->exists ? $pembelian->detail->map(fn ($item) => ['produk_id' => $item->produk_id, 'satuan_produk_id' => $item->satuan_produk_id, 'jumlah' => $item->jumlah, 'harga_beli' => $item->harga_beli, 'diskon' => $item->diskon, 'catatan' => $item->catatan])->all() : []));
+    </script>
+    @vite('resources/js/pages/purchases.js')
+@endsection
