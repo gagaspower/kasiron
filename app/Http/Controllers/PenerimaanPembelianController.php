@@ -142,6 +142,210 @@ class PenerimaanPembelianController extends Controller
         return redirect()->route('purchases.receipts.show', $receipt)->with('success', $message);
     }
 
+    public function edit(PenerimaanPembelian $penerimaan): View
+    {
+        abort_unless(in_array($penerimaan->status, [PenerimaanPembelian::STATUS_DRAFT, PenerimaanPembelian::STATUS_DITERIMA], true), 422, 'Penerimaan ini tidak dapat direvisi.');
+
+        $penerimaan->load(['pembelian.supplier', 'detail.pembelianDetail']);
+        $purchase = $penerimaan->pembelian;
+        $purchase->load(['detail.penerimaanDetail' => fn ($query) => $query->whereHas('penerimaan', fn ($receipt) => $receipt->where('status', PenerimaanPembelian::STATUS_DITERIMA))]);
+
+        $penerimaan->detail->each(function ($row) {
+            $row->pembelianDetail->jumlah_sudah_diterima_lain = 0;
+        });
+
+        $purchase->detail->each(function ($detail) use ($penerimaan) {
+            $detail->jumlah_sudah_diterima_lain = (float) $detail->penerimaanDetail
+                ->where('penerimaan_pembelian_id', '!=', $penerimaan->id)
+                ->sum('jumlah_diterima');
+            $detail->penerimaan_sekarang = (float) $penerimaan->detail
+                ->where('pembelian_detail_id', $detail->id)
+                ->sum('jumlah_diterima');
+            $detail->jumlah_sisa_revisi = max(0, (float) $detail->jumlah - $detail->jumlah_sudah_diterima_lain);
+        });
+
+        return view('purchases.receipts-edit', [
+            'penerimaan' => $penerimaan,
+            'pembelian' => $purchase,
+            'navigation' => app(PembelianController::class)->navigationForView(),
+        ]);
+    }
+
+    public function update(Request $request, PenerimaanPembelian $penerimaan)
+    {
+        $validated = $request->validate([
+            'tanggal_penerimaan' => ['required', 'date'],
+            'catatan' => ['nullable', 'string', 'max:5000'],
+            'alasan_revisi' => ['required', 'string', 'max:1000'],
+            'detail' => ['required', 'array', 'min:1'],
+            'detail.*.jumlah_diterima' => ['nullable', 'numeric', 'min:0'],
+            'detail.*.catatan' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($request, $penerimaan, $validated) {
+            $receipt = PenerimaanPembelian::query()->lockForUpdate()->with('detail.pembelianDetail')->findOrFail($penerimaan->id);
+            abort_unless(in_array($receipt->status, [PenerimaanPembelian::STATUS_DRAFT, PenerimaanPembelian::STATUS_DITERIMA], true), 422, 'Penerimaan ini tidak dapat direvisi.');
+            $purchase = Pembelian::query()->lockForUpdate()->with('detail')->findOrFail($receipt->pembelian_id);
+            $isConfirmed = $receipt->status === PenerimaanPembelian::STATUS_DITERIMA;
+
+            $rows = collect($validated['detail'])->filter(fn ($row) => (float) ($row['jumlah_diterima'] ?? 0) > 0);
+            if ($rows->isEmpty()) {
+                throw ValidationException::withMessages(['detail' => 'Isi minimal satu jumlah barang yang diterima.']);
+            }
+
+            $newRows = [];
+            foreach ($rows as $detailId => $row) {
+                $purchaseDetail = $purchase->detail->firstWhere('id', $detailId);
+                if (! $purchaseDetail) {
+                    throw ValidationException::withMessages(['detail' => 'Rincian produk tidak sesuai dengan pembelian.']);
+                }
+
+                $receivedElsewhere = (float) DB::table('penerimaan_pembelian_detail')
+                    ->join('penerimaan_pembelian', 'penerimaan_pembelian.id', '=', 'penerimaan_pembelian_detail.penerimaan_pembelian_id')
+                    ->where('penerimaan_pembelian_detail.pembelian_detail_id', $detailId)
+                    ->where('penerimaan_pembelian.status', PenerimaanPembelian::STATUS_DITERIMA)
+                    ->where('penerimaan_pembelian.id', '!=', $receipt->id)
+                    ->sum('penerimaan_pembelian_detail.jumlah_diterima');
+
+                $quantity = (float) $row['jumlah_diterima'];
+                if ($quantity > (float) $purchaseDetail->jumlah - $receivedElsewhere + 0.000001) {
+                    throw ValidationException::withMessages(["detail.{$detailId}.jumlah_diterima" => "Jumlah melebihi sisa pesanan setelah memperhitungkan penerimaan lainnya."]);
+                }
+
+                $newRows[$detailId] = [
+                    'pembelian_detail' => $purchaseDetail,
+                    'jumlah' => $quantity,
+                    'jumlah_dasar' => $quantity * (float) $purchaseDetail->konversi_ke_satuan_dasar,
+                    'catatan' => $row['catatan'] ?? null,
+                ];
+            }
+
+            if ($isConfirmed) {
+                $oldByProduct = $receipt->detail->groupBy(fn ($row) => $row->pembelianDetail->produk_id)
+                    ->map(fn ($items) => $items->sum('jumlah_diterima_dalam_satuan_dasar'));
+                $newByProduct = collect($newRows)->groupBy(fn ($row) => $row['pembelian_detail']->produk_id)
+                    ->map(fn ($items) => $items->sum('jumlah_dasar'));
+
+                foreach ($oldByProduct->keys()->merge($newByProduct->keys())->unique() as $productId) {
+                    $product = Produk::withTrashed()->lockForUpdate()->findOrFail($productId);
+                    if (! $product->kelola_stok) {
+                        continue;
+                    }
+
+                    $oldQty = (float) ($oldByProduct[$productId] ?? 0);
+                    $newQty = (float) ($newByProduct[$productId] ?? 0);
+                    $delta = $newQty - $oldQty;
+                    if (abs($delta) < 0.000001) {
+                        continue;
+                    }
+
+                    $before = (float) $product->jumlah_stok;
+                    $after = $before + $delta;
+                    if ($after < -0.000001) {
+                        throw ValidationException::withMessages(['stok' => "Revisi tidak dapat dilakukan karena stok {$product->nama} sudah terpakai."]);
+                    }
+                    $product->update(['jumlah_stok' => max(0, $after)]);
+                    MutasiStok::create([
+                        'produk_id' => $product->id,
+                        'jenis' => $delta > 0 ? MutasiStok::JENIS_MASUK : MutasiStok::JENIS_KELUAR,
+                        'jumlah' => abs($delta),
+                        'stok_sebelum' => $before,
+                        'stok_sesudah' => max(0, $after),
+                        'referensi_tipe' => 'revisi_penerimaan_pembelian',
+                        'referensi_id' => $receipt->id,
+                        'catatan' => 'Revisi ' . $receipt->nomor_penerimaan . ': ' . $validated['alasan_revisi'],
+                    ]);
+                }
+            }
+
+            $receipt->detail()->delete();
+            foreach ($newRows as $detailId => $row) {
+                $receipt->detail()->create([
+                    'pembelian_detail_id' => $detailId,
+                    'jumlah_diterima' => $row['jumlah'],
+                    'jumlah_diterima_dalam_satuan_dasar' => $row['jumlah_dasar'],
+                    'catatan' => $row['catatan'],
+                ]);
+            }
+
+            $receipt->update([
+                'tanggal_penerimaan' => $validated['tanggal_penerimaan'],
+                'catatan' => $validated['catatan'] ?? null,
+            ]);
+            $this->refreshPurchaseStatus($purchase);
+        });
+
+        return redirect()->route('purchases.receipts.show', $penerimaan)->with('success', 'Penerimaan berhasil direvisi dan stok telah disesuaikan.');
+    }
+
+    public function cancel(Request $request, PenerimaanPembelian $penerimaan)
+    {
+        $validated = $request->validate([
+            'alasan_pembatalan' => ['required', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($request, $penerimaan, $validated) {
+            $receipt = PenerimaanPembelian::query()->lockForUpdate()->with('detail.pembelianDetail')->findOrFail($penerimaan->id);
+            abort_unless(in_array($receipt->status, [PenerimaanPembelian::STATUS_DRAFT, PenerimaanPembelian::STATUS_DITERIMA], true), 422, 'Penerimaan ini sudah dibatalkan.');
+
+            $purchase = Pembelian::query()->lockForUpdate()->with('detail')->findOrFail($receipt->pembelian_id);
+            if ($receipt->status === PenerimaanPembelian::STATUS_DITERIMA) {
+                $byProduct = $receipt->detail->groupBy(fn ($row) => $row->pembelianDetail->produk_id)
+                    ->map(fn ($items) => $items->sum('jumlah_diterima_dalam_satuan_dasar'));
+
+                foreach ($byProduct as $productId => $quantity) {
+                    $product = Produk::withTrashed()->lockForUpdate()->findOrFail($productId);
+                    if (! $product->kelola_stok) {
+                        continue;
+                    }
+
+                    $before = (float) $product->jumlah_stok;
+                    $after = $before - (float) $quantity;
+                    if ($after < -0.000001) {
+                        throw ValidationException::withMessages(['pembatalan' => "Penerimaan tidak dapat dibatalkan karena stok {$product->nama} sudah terpakai. Lakukan penyesuaian stok terlebih dahulu."]);
+                    }
+                    $product->update(['jumlah_stok' => max(0, $after)]);
+                    MutasiStok::create([
+                        'produk_id' => $product->id,
+                        'jenis' => MutasiStok::JENIS_KELUAR,
+                        'jumlah' => $quantity,
+                        'stok_sebelum' => $before,
+                        'stok_sesudah' => max(0, $after),
+                        'referensi_tipe' => 'pembatalan_penerimaan_pembelian',
+                        'referensi_id' => $receipt->id,
+                        'catatan' => 'Pembatalan ' . $receipt->nomor_penerimaan . ': ' . $validated['alasan_pembatalan'],
+                    ]);
+                }
+            }
+
+            $receipt->update(['status' => 'dibatalkan']);
+            $this->refreshPurchaseStatus($purchase);
+        });
+
+        return redirect()->route('purchases.receipts.show', $penerimaan)->with('success', 'Penerimaan berhasil dibatalkan.');
+    }
+
+    private function refreshPurchaseStatus(Pembelian $purchase): void
+    {
+        $allReceived = true;
+        $hasReceived = false;
+        foreach ($purchase->detail as $purchaseDetail) {
+            $received = (float) DB::table('penerimaan_pembelian_detail')
+                ->join('penerimaan_pembelian', 'penerimaan_pembelian.id', '=', 'penerimaan_pembelian_detail.penerimaan_pembelian_id')
+                ->where('penerimaan_pembelian_detail.pembelian_detail_id', $purchaseDetail->id)
+                ->where('penerimaan_pembelian.status', PenerimaanPembelian::STATUS_DITERIMA)
+                ->sum('penerimaan_pembelian_detail.jumlah_diterima');
+            $hasReceived = $hasReceived || $received > 0;
+            if ($received + 0.000001 < (float) $purchaseDetail->jumlah) {
+                $allReceived = false;
+            }
+        }
+
+        $purchase->update([
+            'status' => $allReceived ? Pembelian::STATUS_DITERIMA : ($hasReceived ? Pembelian::STATUS_SEBAGIAN_DITERIMA : Pembelian::STATUS_DISETUJUI),
+        ]);
+    }
+
     public function show(PenerimaanPembelian $penerimaan): View
     {
         $penerimaan->load(['pembelian.supplier', 'detail.pembelianDetail', 'dibuatOleh', 'diterimaOleh']);
@@ -222,9 +426,7 @@ class PenerimaanPembelianController extends Controller
             }
         }
 
-        $purchase->update([
-            'status' => $allReceived ? Pembelian::STATUS_DITERIMA : Pembelian::STATUS_SEBAGIAN_DITERIMA,
-        ]);
+        $this->refreshPurchaseStatus($purchase);
     }
 
     private function generateReceiptNumber(): string
