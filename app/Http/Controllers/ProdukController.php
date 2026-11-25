@@ -249,8 +249,17 @@ class ProdukController extends Controller
         foreach ($validated['satuan_penjualan'] as $index => $row) {
             if (! empty($row['barcode'])) {
                 $barcodeRule = Rule::unique('satuan_produk', 'barcode');
-                if (! empty($row['id'])) {
-                    $barcodeRule->ignore($row['id']);
+                $existingUnitId = $row['id'] ?? null;
+
+                if (! $existingUnitId && $produk) {
+                    $existingUnitId = $produk->satuanProduk()
+                        ->withTrashed()
+                        ->where('satuan_id', $row['satuan_id'])
+                        ->value('id');
+                }
+
+                if ($existingUnitId) {
+                    $barcodeRule->ignore($existingUnitId);
                 }
 
                 $barcodeValidator = validator(
@@ -347,7 +356,9 @@ class ProdukController extends Controller
                 ->with(['kategori', 'satuanDasar', 'satuanProduk.satuan'])
                 ->when($trash, fn (Builder $query) => $query->onlyTrashed())
                 ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%")->orWhere('kode_sku', 'like', "%{$search}%");
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('kode_sku', 'like', "%{$search}%")
+                        ->orWhereHas('satuanProduk', fn (Builder $unitQuery) => $unitQuery->where('barcode', 'like', "%{$search}%"));
                 }))
                 ->orderBy('nama')
                 ->paginate(10)
