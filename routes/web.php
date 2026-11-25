@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\KategoriController;
-use Illuminate\Support\Facades\Route;
+use App\\Http\\Controllers\\DashboardController;
+use App\\Http\\Controllers\\LoginController;
+use App\\Http\\Controllers\\KategoriController;
+use App\\Http\\Controllers\\SatuanController;
+use Illuminate\\Support\\Facades\\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [LoginController::class, 'create'])->name('login');
@@ -17,21 +18,15 @@ Route::middleware('auth')->group(function () {
         return view('products.index', [
             'navigation' => [
                 ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => false],
-                [
-                    'label' => 'Transaksi',
-                    'children' => [
-                        ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
-                        ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
-                    ],
-                ],
+                ['label' => 'Transaksi', 'children' => [
+                    ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
+                    ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
+                ]],
                 ['label' => 'Manajemen Produk', 'href' => route('products.index'), 'active' => true],
-                [
-                    'label' => 'Laporan',
-                    'children' => [
-                        ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
-                        ['label' => 'Pembayaran', 'href' => '#ringkasan'],
-                    ],
-                ],
+                ['label' => 'Laporan', 'children' => [
+                    ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
+                    ['label' => 'Pembayaran', 'href' => '#ringkasan'],
+                ]],
             ],
         ]);
     })->name('products.index');
@@ -44,6 +39,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/kategori/{id}/restore', [KategoriController::class, 'restore'])->name('categories.restore');
     Route::delete('/kategori/{id}/permanen', [KategoriController::class, 'forceDelete'])->name('categories.force-delete');
     Route::post('/kategori/bulk-action', [KategoriController::class, 'bulkAction'])->name('categories.bulk-action');
+
+    Route::get('/satuan', [SatuanController::class, 'index'])->name('units.index');
+    Route::post('/satuan', [SatuanController::class, 'store'])->name('units.store');
+    Route::put('/satuan/{satuan}', [SatuanController::class, 'update'])->name('units.update');
+    Route::patch('/satuan/{satuan}/status', [SatuanController::class, 'toggleStatus'])->name('units.toggle-status');
+    Route::delete('/satuan/{satuan}', [SatuanController::class, 'destroy'])->name('units.destroy');
+    Route::patch('/satuan/{id}/restore', [SatuanController::class, 'restore'])->name('units.restore');
+    Route::delete('/satuan/{id}/permanen', [SatuanController::class, 'forceDelete'])->name('units.force-delete');
+    Route::post('/satuan/bulk-action', [SatuanController::class, 'bulkAction'])->name('units.bulk-action');
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
