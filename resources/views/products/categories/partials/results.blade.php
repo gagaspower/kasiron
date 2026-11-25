@@ -10,9 +10,11 @@
                     <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                     <input type="text" name="search" value="{{ $search }}" placeholder="Cari kategori..." autocomplete="off" data-category-search class="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-9 text-sm outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 sm:w-64"><button type="button" data-category-search-clear aria-label="Hapus pencarian" class="{{ $search !== '' ? '' : 'hidden' }} absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
                 </form>
-                <a href="{{ route('categories.index', ['status' => $trash ? 'active' : 'trash']) }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-                    {{ $trash ? 'Kategori aktif' : 'Sampah' }}
-                </a>
+                <label class="sr-only" for="category-status-filter">Tampilkan kategori</label>
+                <select id="category-status-filter" data-category-status-filter class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 sm:w-44">
+                    <option value="active" @selected(!$trash)>Kategori aktif</option>
+                    <option value="trash" @selected($trash)>Sampah</option>
+                </select>
             </div>
         </div>
 
