@@ -64,7 +64,7 @@ const refreshResults = async (url, history = true) => {
 };
 
 const askConfirmation = (message, destructive = false) => {
-    if (!confirmModal) return Promise.resolve(window.confirm(message));
+    if (!confirmModal) return Promise.resolve(false);
     confirmModal.querySelector("[data-product-confirm-message]").textContent = message;
     const accept = confirmModal.querySelector("[data-product-confirm-accept]");
     accept.className = destructive
