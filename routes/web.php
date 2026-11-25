@@ -7,6 +7,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PembelianController;
+use App\Http\Controllers\PenerimaanPembelianController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
