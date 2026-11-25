@@ -4,17 +4,110 @@ const rowTemplate = document.querySelector("[data-purchase-row-template]");
 const confirmDialog = document.querySelector("[data-purchase-confirm]");
 let resolveConfirmation = null;
 
-const products = form ? JSON.parse(form.dataset.products || "[]") : [];
 const money = value => new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(value) || 0);
 const field = (row, name) => row.querySelector(`[data-field="${name}"]`);
 
-const productById = id => products.find(product => product.id === id);
+const pickerRequests = new WeakMap();
 
-const updateUnits = (row, selectedUnit = "") => {
-    const product = productById(field(row, "produk_id").value);
+const closePicker = (box, input) => {
+    box.classList.add("hidden");
+    input.setAttribute("aria-expanded", "false");
+};
+
+const renderPickerOptions = (box, input, items, emptyText, choose) => {
+    box.replaceChildren();
+    if (!items.length) {
+        const empty = document.createElement("p");
+        empty.className = "px-3 py-3 text-sm text-slate-500";
+        empty.textContent = emptyText;
+        box.append(empty);
+    } else {
+        items.forEach(item => {
+            const option = document.createElement("button");
+            option.type = "button";
+            option.role = "option";
+            option.className = "block w-full rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-800";
+            option.textContent = item.text;
+            option.addEventListener("click", () => choose(item));
+            box.append(option);
+        });
+    }
+    box.classList.remove("hidden");
+    input.setAttribute("aria-expanded", "true");
+};
+
+const fetchOptions = async (picker, query) => {
+    const requestId = (pickerRequests.get(picker) || 0) + 1;
+    pickerRequests.set(picker, requestId);
+    const url = new URL(picker.dataset.optionsUrl, window.location.origin);
+    if (query.trim()) url.searchParams.set("q", query.trim());
+    const response = await fetch(url, { headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" } });
+    if (!response.ok) throw new Error("Gagal memuat pilihan.");
+    const payload = await response.json();
+    return pickerRequests.get(picker) === requestId ? (payload.results || []) : null;
+};
+
+const bindSearchPicker = ({ picker, input, valueInput, box, clearButton, emptyText, onChoose, onClear }) => {
+    let timer;
+    const search = async query => {
+        try {
+            const items = await fetchOptions(picker, query);
+            if (items) renderPickerOptions(box, input, items, emptyText, onChoose);
+        } catch {
+            renderPickerOptions(box, input, [], emptyText, onChoose);
+        }
+    };
+    input.addEventListener("focus", () => search(input.value));
+    input.addEventListener("input", () => {
+        valueInput.value = "";
+        clearButton.classList.add("hidden");
+        clearButton.classList.remove("flex");
+        onClear?.();
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => search(input.value), 250);
+    });
+    clearButton.addEventListener("click", () => {
+        valueInput.value = "";
+        input.value = "";
+        clearButton.classList.add("hidden");
+        clearButton.classList.remove("flex");
+        onClear?.();
+        search("");
+        input.focus();
+    });
+    document.addEventListener("click", event => {
+        if (!picker.contains(event.target)) closePicker(box, input);
+    });
+    if (valueInput.value) {
+        clearButton.classList.remove("hidden");
+        clearButton.classList.add("flex");
+    }
+    return { close: () => closePicker(box, input), search };
+};
+
+const supplierPicker = document.querySelector("[data-purchase-supplier-picker]");
+if (supplierPicker) {
+    const input = supplierPicker.querySelector("[data-purchase-supplier-search]");
+    const valueInput = supplierPicker.querySelector("[data-purchase-supplier-value]");
+    const box = supplierPicker.querySelector("[data-purchase-supplier-options]");
+    const clearButton = supplierPicker.querySelector("[data-purchase-supplier-clear]");
+    bindSearchPicker({
+        picker: supplierPicker, input, valueInput, box, clearButton,
+        emptyText: "Supplier tidak ditemukan.",
+        onChoose: item => {
+            valueInput.value = item.id;
+            input.value = item.text;
+            clearButton.classList.remove("hidden");
+            clearButton.classList.add("flex");
+            closePicker(box, input);
+        },
+    });
+}
+
+const updateUnits = (row, units = [], selectedUnit = "") => {
     const unitSelect = field(row, "satuan_produk_id");
     unitSelect.innerHTML = '<option value="">Pilih satuan</option>';
-    (product?.units || []).forEach(unit => {
+    units.forEach(unit => {
         const option = document.createElement("option");
         option.value = unit.id;
         option.textContent = `${unit.nama} (1 = ${unit.konversi} satuan dasar)`;
@@ -52,20 +145,47 @@ const calculate = () => {
 const addRow = (values = {}) => {
     const fragment = rowTemplate.content.cloneNode(true);
     const row = fragment.querySelector("[data-purchase-row]");
-    const productSelect = field(row, "produk_id");
-    products.forEach(product => {
-        const option = document.createElement("option");
-        option.value = product.id;
-        option.textContent = product.sku ? `${product.nama} · ${product.sku}` : product.nama;
-        productSelect.append(option);
-    });
+    rowsContainer.append(fragment);
 
-    productSelect.value = values.produk_id || "";
-    updateUnits(row, values.satuan_produk_id || "");
+    const picker = row.querySelector("[data-purchase-product-picker]");
+    const input = picker.querySelector("[data-purchase-product-search]");
+    const valueInput = field(row, "produk_id");
+    const box = picker.querySelector("[data-purchase-product-options]");
+    const clearButton = picker.querySelector("[data-purchase-product-clear]");
+    const chooseProduct = product => {
+        valueInput.value = product.id;
+        input.value = product.text;
+        row.dataset.units = JSON.stringify(product.units || []);
+        updateUnits(row, product.units || []);
+        clearButton.classList.remove("hidden");
+        clearButton.classList.add("flex");
+        closePicker(box, input);
+    };
+    const pickerApi = bindSearchPicker({
+        picker, input, valueInput, box, clearButton,
+        emptyText: "Produk tidak ditemukan.",
+        onChoose: chooseProduct,
+        onClear: () => {
+            row.dataset.units = "[]";
+            updateUnits(row, []);
+        },
+    });
+    row._productPicker = { search: pickerApi.search };
+    if (values.produk_id) {
+        fetchOptions(picker, "").then(items => {
+            const selected = items?.find(item => item.id === values.produk_id);
+            if (selected) chooseProduct(selected);
+            else {
+                valueInput.value = values.produk_id;
+                input.value = values.nama_produk || "Produk tidak aktif";
+                updateUnits(row, values.units || [], values.satuan_produk_id || "");
+            }
+            if (values.satuan_produk_id) field(row, "satuan_produk_id").value = values.satuan_produk_id;
+        }).catch(() => {});
+    }
     ["jumlah", "harga_beli", "diskon", "catatan"].forEach(name => {
         if (values[name] !== undefined && values[name] !== null) field(row, name).value = values[name];
     });
-    rowsContainer.append(fragment);
     renumber();
     calculate();
 };
@@ -79,10 +199,7 @@ if (form) {
     form.querySelector("[data-purchase-extra]").addEventListener("input", calculate);
 
     rowsContainer.addEventListener("change", event => {
-        if (event.target.matches('[data-field="produk_id"]')) {
-            updateUnits(event.target.closest("[data-purchase-row]"));
-            calculate();
-        }
+        if (event.target.matches('[data-field="satuan_produk_id"]')) calculate();
     });
     rowsContainer.addEventListener("input", event => {
         if (event.target.matches('[data-field="jumlah"], [data-field="harga_beli"], [data-field="diskon"]')) calculate();
@@ -93,6 +210,10 @@ if (form) {
         const row = remove.closest("[data-purchase-row]");
         if (rowsContainer.querySelectorAll("[data-purchase-row]").length === 1) {
             ["produk_id", "satuan_produk_id", "catatan"].forEach(name => field(row, name).value = "");
+            row.querySelector("[data-purchase-product-search]").value = "";
+            row.querySelector("[data-purchase-product-clear]").classList.add("hidden");
+            row.dataset.units = "[]";
+            updateUnits(row, []);
             field(row, "jumlah").value = "1";
             field(row, "harga_beli").value = "0";
             field(row, "diskon").value = "0";
