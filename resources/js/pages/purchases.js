@@ -290,9 +290,13 @@ if (form) {
     });
 }
 
-const askConfirmation = message => {
+const askConfirmation = (message, title = "Konfirmasi tindakan", acceptLabel = "Ya, lanjutkan") => {
     if (!confirmDialog) return Promise.resolve(false);
     confirmDialog.querySelector("[data-purchase-confirm-message]").textContent = message;
+    const titleElement = confirmDialog.querySelector("[data-purchase-confirm-title]");
+    const acceptButton = confirmDialog.querySelector("[data-purchase-confirm-accept]");
+    if (titleElement) titleElement.textContent = title;
+    if (acceptButton) acceptButton.textContent = acceptLabel;
     confirmDialog.showModal();
     return new Promise(resolve => { resolveConfirmation = resolve; });
 };
@@ -321,3 +325,15 @@ document.querySelector("[data-purchase-delete-form]")?.addEventListener("submit"
 });
 
 
+
+document.querySelectorAll("[data-purchase-confirm-form]").forEach(confirmForm => {
+    confirmForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        const accepted = await askConfirmation(
+            confirmForm.dataset.confirmMessage || "Lanjutkan tindakan ini?",
+            confirmForm.dataset.confirmTitle || "Konfirmasi tindakan",
+            confirmForm.dataset.confirmAccept || "Ya, lanjutkan"
+        );
+        if (accepted) confirmForm.submit();
+    });
+});
