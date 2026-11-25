@@ -37,7 +37,7 @@ class PembelianController extends Controller
             ->when($status !== '' && in_array($status, ['draft', 'disetujui', 'sebagian_diterima', 'diterima', 'dibatalkan'], true), fn (Builder $query) => $query->where('status', $status))
             ->latest('dibuat_pada')
             ->paginate(10)
-            ->withPath(route('purchases.index'))
+            ->withPath(route('purchases.transactions.index'))
             ->withQueryString();
 
         return view('purchases.transactions.index', [
