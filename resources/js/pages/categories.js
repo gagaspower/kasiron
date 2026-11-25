@@ -150,7 +150,15 @@ document.addEventListener("click", async (event) => {
     const bulkButton = event.target.closest("[data-bulk-submit]");
     if (bulkButton) {
         const form = bulkButton.closest("form");
-        if (!form?.querySelector("[data-row-checkbox]:checked")) {
+        // The row checkboxes live in the table outside the bulk form and
+        // are associated through their HTML form="category-bulk-form" attribute.
+        const hasSelectedRows = form
+            ? Array.from(form.elements).some((element) =>
+                element.matches?.("[data-row-checkbox]") && element.checked
+            )
+            : false;
+
+        if (!hasSelectedRows) {
             event.preventDefault();
             showCategoryNotice("Pilih minimal satu kategori terlebih dahulu.", true);
             return;
