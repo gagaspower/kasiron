@@ -101,8 +101,9 @@ const ajaxCategoryForm = async (form) => {
     data.set("page", context.page);
     setCategoryLoading(true);
     let payload;
+    let response;
     try {
-        const response = await fetch(form.getAttribute("action"), {
+        response = await fetch(form.getAttribute("action"), {
             method: "POST",
             body: data,
             headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
