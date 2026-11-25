@@ -29,7 +29,8 @@
                 </div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Nomor faktur supplier</label><input name="nomor_faktur_supplier" value="{{ old('nomor_faktur_supplier', $pembelian->nomor_faktur_supplier) }}" maxlength="100" placeholder="Opsional" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal pembelian <span class="text-rose-500">*</span></label><input type="date" name="tanggal_pembelian" value="{{ old('tanggal_pembelian', $pembelian->tanggal_pembelian?->format('Y-m-d')) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
-                <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal jatuh tempo</label><input type="date" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $pembelian->tanggal_jatuh_tempo?->format('Y-m-d')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
+                <div><label for="purchase-payment-type" class="mb-2 block text-sm font-medium text-slate-700">Jenis pembayaran <span class="text-rose-500">*</span></label><select id="purchase-payment-type" name="jenis_pembayaran" required data-purchase-payment-type class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"><option value="tunai" @selected(old('jenis_pembayaran', $pembelian->jenis_pembayaran ?? \\App\\Models\\Pembelian::JENIS_PEMBAYARAN_TUNAI) === \\App\\Models\\Pembelian::JENIS_PEMBAYARAN_TUNAI)>Tunai</option><option value="kredit" @selected(old('jenis_pembayaran', $pembelian->jenis_pembayaran) === \\App\\Models\\Pembelian::JENIS_PEMBAYARAN_KREDIT)>Kredit / Tempo</option></select></div>
+                <div data-purchase-due-date><label for="purchase-due-date" class="mb-2 block text-sm font-medium text-slate-700">Tanggal jatuh tempo <span class="text-rose-500" data-due-date-required>*</span></label><input id="purchase-due-date" type="date" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $pembelian->tanggal_jatuh_tempo?->format('Y-m-d')) }}" data-purchase-due-date-input class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div class="md:col-span-2"><label class="mb-2 block text-sm font-medium text-slate-700">Catatan</label><textarea name="catatan" rows="2" maxlength="5000" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm" placeholder="Catatan pembelian (opsional)">{{ old('catatan', $pembelian->catatan) }}</textarea></div>
             </div>
         </section>
@@ -91,6 +92,27 @@
     @endphp
     <script>
         window.purchaseInitialRows = @json($initialPurchaseRows);
+
+        (() => {
+            const paymentType = document.querySelector('[data-purchase-payment-type]');
+            const dueDateInput = document.querySelector('[data-purchase-due-date-input]');
+            const dueDateRequired = document.querySelector('[data-due-date-required]');
+            const dueDateWrapper = document.querySelector('[data-purchase-due-date]');
+
+            if (!paymentType || !dueDateInput || !dueDateWrapper) return;
+
+            const syncDueDateField = () => {
+                const isCredit = paymentType.value === 'kredit';
+                dueDateInput.required = isCredit;
+                dueDateInput.disabled = !isCredit;
+                dueDateWrapper.classList.toggle('opacity-50', !isCredit);
+                if (dueDateRequired) dueDateRequired.classList.toggle('hidden', !isCredit);
+                if (!isCredit) dueDateInput.value = '';
+            };
+
+            paymentType.addEventListener('change', syncDueDateField);
+            syncDueDateField();
+        })();
     </script>
     @vite('resources/js/pages/purchases.js')
 @endsection
