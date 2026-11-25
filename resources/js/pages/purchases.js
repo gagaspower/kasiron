@@ -29,11 +29,19 @@ const bindMoneyInput = (displayInput, rawInput) => {
     });
 
     displayInput.addEventListener("input", () => {
-        const cursorAtEnd = displayInput.selectionStart === displayInput.value.length;
-        const previousLength = displayInput.value.length;
-        displayInput.value = displayInput.value.replace(/[^0-9]/g, "");
-        syncRaw();
-        if (cursorAtEnd) displayInput.setSelectionRange(displayInput.value.length, displayInput.value.length);
+        const cursor = displayInput.selectionStart ?? displayInput.value.length;
+        const digitsBeforeCursor = displayInput.value.slice(0, cursor).replace(/[^0-9]/g, "").length;
+        const digits = displayInput.value.replace(/[^0-9]/g, "");
+        rawInput.value = digits === "" ? "" : String(Number(digits));
+        displayInput.value = digits === "" ? "" : money(digits);
+
+        let nextCursor = 0;
+        let countedDigits = 0;
+        while (nextCursor < displayInput.value.length && countedDigits < digitsBeforeCursor) {
+            if (/[0-9]/.test(displayInput.value[nextCursor])) countedDigits++;
+            nextCursor++;
+        }
+        displayInput.setSelectionRange(nextCursor, nextCursor);
     });
 
     displayInput.addEventListener("blur", () => {
