@@ -62,5 +62,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/satuan/{id}/permanen', [SatuanController::class, 'forceDelete'])->name('units.force-delete');
     Route::post('/satuan/bulk-action', [SatuanController::class, 'bulkAction'])->name('units.bulk-action');
 
-    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/supplier', [SupplierController::class, 'index'])->name('suppliers.index');\n    Route::post('/supplier', [SupplierController::class, 'store'])->name('suppliers.store');\n    Route::put('/supplier/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');\n    Route::patch('/supplier/{supplier}/status', [SupplierController::class, 'toggleStatus'])->name('suppliers.toggle-status');\n    Route::delete('/supplier/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');\n    Route::patch('/supplier/{id}/restore', [SupplierController::class, 'restore'])->name('suppliers.restore');\n    Route::delete('/supplier/{id}/permanen', [SupplierController::class, 'forceDelete'])->name('suppliers.force-delete');\n    Route::post('/supplier/bulk-action', [SupplierController::class, 'bulkAction'])->name('suppliers.bulk-action');\n\n    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
