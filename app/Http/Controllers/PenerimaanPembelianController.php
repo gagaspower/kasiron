@@ -19,8 +19,9 @@ class PenerimaanPembelianController extends Controller
     public function index(Request $request): View
     {
         $search = trim($request->string('search')->value());
-        $tanggalMulai = $request->string('tanggal_mulai')->value();
-        $tanggalSelesai = $request->string('tanggal_selesai')->value();
+        $tanggalHariIni = now()->toDateString();
+        $tanggalMulai = $request->query('tanggal_mulai', $tanggalHariIni);
+        $tanggalSelesai = $request->query('tanggal_selesai', $tanggalHariIni);
         $supplierId = $request->string('supplier_id')->value();
 
         $pembelians = Pembelian::query()
