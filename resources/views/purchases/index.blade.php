@@ -27,6 +27,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Transaksi Pembelian</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat barang yang dibeli dari supplier, termasuk rincian produk, jumlah, harga, dan total pembelian.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-blue-700 transition group-hover:gap-2">Buka transaksi <span aria-hidden="true">→</span></span>
         </a>
 
         <a href="{{ route('purchases.receipts.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg sm:p-6">
@@ -44,6 +45,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Penerimaan Barang</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat dan konfirmasi barang yang benar-benar diterima. Stok bertambah setelah penerimaan dikonfirmasi.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-emerald-700 transition group-hover:gap-2">Buka penerimaan <span aria-hidden="true">→</span></span>
         </a>
 
         <a href="{{ route('purchases.payments.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg sm:p-6">
@@ -59,6 +61,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Pembayaran Pembelian</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat pembayaran pembelian, baik pembayaran langsung maupun pembayaran bertahap kepada supplier.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-violet-700 transition group-hover:gap-2">Buka pembayaran <span aria-hidden="true">→</span></span>
         </a>
     </section>
 @endsection
