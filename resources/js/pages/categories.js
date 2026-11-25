@@ -138,7 +138,7 @@ const ajaxCategoryForm = async (form) => {
 };
 
 const askCategoryConfirmation = (message, confirmLabel = "Ya, lanjutkan", destructive = false) => {
-    if (!confirmationModal) return Promise.resolve(window.confirm(message));
+    if (!confirmationModal) return Promise.resolve(false);
 
     confirmationMessage.textContent = message;
     const confirmButton = confirmationModal.querySelector("[data-category-confirm-accept]");
