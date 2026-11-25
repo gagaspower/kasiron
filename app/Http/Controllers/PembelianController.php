@@ -333,6 +333,11 @@ class PembelianController extends Controller
         return $number;
     }
 
+    public function navigationForView(): array
+    {
+        return $this->navigation();
+    }
+
     private function navigation(): array
     {
         return [
