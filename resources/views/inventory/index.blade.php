@@ -24,6 +24,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Ringkasan Stok</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Pantau jumlah stok tersedia dan kondisi persediaan seluruh produk.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-blue-700 transition group-hover:gap-2">Buka ringkasan stok <span aria-hidden="true">→</span></span>
         </div>
 
         <div class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-lg sm:p-6">
@@ -36,6 +37,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Barang Keluar</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat barang keluar selain dari transaksi penjualan.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-amber-700 transition group-hover:gap-2">Buka barang keluar <span aria-hidden="true">→</span></span>
         </div>
 
         <div class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg sm:p-6">
@@ -48,6 +50,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Penyesuaian Stok</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Sesuaikan jumlah stok berdasarkan hasil stok opname atau koreksi.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-violet-700 transition group-hover:gap-2">Buka penyesuaian stok <span aria-hidden="true">→</span></span>
         </div>
 
         <div class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg sm:p-6">
@@ -60,6 +63,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Riwayat Mutasi</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Telusuri riwayat perubahan stok dari seluruh aktivitas toko.</p>
             </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-emerald-700 transition group-hover:gap-2">Buka riwayat mutasi <span aria-hidden="true">→</span></span>
         </div>
     </section>
 @endsection
