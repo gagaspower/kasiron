@@ -337,3 +337,104 @@ document.querySelectorAll("[data-purchase-confirm-form]").forEach(confirmForm =>
         if (accepted) confirmForm.submit();
     });
 });
+
+
+// Purchase transaction listing: AJAX search, filter, pagination, and loading feedback.
+const purchaseResults = document.querySelector("[data-purchase-results]");
+if (purchaseResults) {
+    let purchaseSearchTimer;
+    let purchaseRequest = 0;
+    let purchaseLoadingOverlay = null;
+
+    const setPurchaseLoading = loading => {
+        if (loading) {
+            if (purchaseLoadingOverlay) return;
+            purchaseResults.classList.add("relative", "min-h-[160px]");
+            purchaseResults.setAttribute("aria-busy", "true");
+            purchaseLoadingOverlay = document.createElement("div");
+            purchaseLoadingOverlay.className = "absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-[1px]";
+            purchaseLoadingOverlay.innerHTML = '<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm"><span class="size-5 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-600"></span><span>Memuat data...</span></div>';
+            purchaseResults.append(purchaseLoadingOverlay);
+        } else {
+            purchaseLoadingOverlay?.remove();
+            purchaseLoadingOverlay = null;
+            purchaseResults.removeAttribute("aria-busy");
+        }
+    };
+
+    const showPurchaseNotice = message => {
+        let notice = document.querySelector("[data-purchase-list-notice]");
+        if (!notice) {
+            notice = document.createElement("div");
+            notice.dataset.purchaseListNotice = "";
+            notice.className = "mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700";
+            purchaseResults.before(notice);
+        }
+        notice.textContent = message;
+    };
+
+    const refreshPurchaseResults = async (url, pushHistory = true) => {
+        const requestId = ++purchaseRequest;
+        const target = new URL(url, window.location.origin);
+        setPurchaseLoading(true);
+        try {
+            const response = await fetch(target, {
+                headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" }
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || "Tidak dapat memuat daftar pembelian.");
+            if (requestId !== purchaseRequest) return;
+            purchaseResults.innerHTML = payload.html;
+            if (pushHistory) window.history.pushState({}, "", payload.url || target);
+            document.querySelector("[data-purchase-list-notice]")?.remove();
+        } finally {
+            if (requestId === purchaseRequest) setPurchaseLoading(false);
+        }
+    };
+
+    const purchaseFilterUrl = form => {
+        const url = new URL(form.action, window.location.origin);
+        for (const [key, value] of new FormData(form).entries()) {
+            if (String(value).trim()) url.searchParams.set(key, value);
+            else url.searchParams.delete(key);
+        }
+        url.searchParams.delete("page");
+        return url;
+    };
+
+    document.addEventListener("submit", async event => {
+        const form = event.target.closest("[data-purchase-search-form]");
+        if (!form) return;
+        event.preventDefault();
+        window.clearTimeout(purchaseSearchTimer);
+        try { await refreshPurchaseResults(purchaseFilterUrl(form)); }
+        catch (error) { showPurchaseNotice(error.message); setPurchaseLoading(false); }
+    });
+
+    document.addEventListener("input", event => {
+        if (!event.target.matches("[data-purchase-search]")) return;
+        window.clearTimeout(purchaseSearchTimer);
+        purchaseSearchTimer = window.setTimeout(async () => {
+            const form = purchaseResults.querySelector("[data-purchase-search-form]");
+            if (!form) return;
+            try { await refreshPurchaseResults(purchaseFilterUrl(form)); }
+            catch (error) { showPurchaseNotice(error.message); setPurchaseLoading(false); }
+        }, 350);
+    });
+
+    document.addEventListener("click", async event => {
+        const pageLink = event.target.closest("[data-purchase-results] nav a, [data-purchase-results] a[rel='next'], [data-purchase-results] a[rel='prev']");
+        const resetLink = event.target.closest("[data-purchase-reset]");
+        const link = pageLink || resetLink;
+        if (!link?.href) return;
+        event.preventDefault();
+        window.clearTimeout(purchaseSearchTimer);
+        try { await refreshPurchaseResults(link.href); }
+        catch (error) { showPurchaseNotice(error.message); setPurchaseLoading(false); }
+    });
+
+    window.addEventListener("popstate", async () => {
+        try { await refreshPurchaseResults(window.location.href, false); }
+        catch (error) { showPurchaseNotice(error.message); setPurchaseLoading(false); }
+    });
+}
