@@ -71,7 +71,7 @@ class ProdukController extends Controller
                 'jumlah_stok' => $validated['jumlah_stok'] ?? 0,
                 'stok_minimum' => $validated['stok_minimum'] ?? 0,
                 'kelola_stok' => $request->boolean('kelola_stok'),
-                'aktif' => $request->boolean('aktif', true),
+                'aktif' => $request->boolean('aktif'),
             ]);
 
             $this->syncSaleUnits($product, $validated['satuan_penjualan']);
@@ -234,6 +234,27 @@ class ProdukController extends Controller
             'satuan_penjualan.required' => 'Tambahkan minimal satu satuan penjualan.',
             'satuan_penjualan.*.satuan_id.distinct' => 'Satuan penjualan tidak boleh dipilih lebih dari sekali.',
         ]);
+
+        foreach ($validated['satuan_penjualan'] as $index => $row) {
+            if (! empty($row['barcode'])) {
+                $barcodeRule = Rule::unique('satuan_produk', 'barcode');
+                if (! empty($row['id'])) {
+                    $barcodeRule->ignore($row['id']);
+                }
+
+                $barcodeValidator = validator(
+                    ['barcode' => $row['barcode']],
+                    ['barcode' => ['nullable', 'string', 'max:255', $barcodeRule]],
+                    ['barcode.unique' => 'Barcode sudah digunakan oleh satuan produk lain.']
+                );
+
+                if ($barcodeValidator->fails()) {
+                    throw ValidationException::withMessages([
+                        "satuan_penjualan.{$index}.barcode" => $barcodeValidator->errors()->first('barcode'),
+                    ]);
+                }
+            }
+        }
 
         $rows = collect($validated['satuan_penjualan']);
         $baseRow = $rows->firstWhere('satuan_id', $validated['satuan_dasar_id']);
