@@ -57,8 +57,24 @@
 @endsection
 
 @section('script')
+    @php
+        $initialPurchaseRows = old('detail');
+
+        if ($initialPurchaseRows === null) {
+            $initialPurchaseRows = $pembelian->exists
+                ? $pembelian->detail->map(fn ($item) => [
+                    'produk_id' => $item->produk_id,
+                    'satuan_produk_id' => $item->satuan_produk_id,
+                    'jumlah' => $item->jumlah,
+                    'harga_beli' => $item->harga_beli,
+                    'diskon' => $item->diskon,
+                    'catatan' => $item->catatan,
+                ])->all()
+                : [];
+        }
+    @endphp
     <script>
-        window.purchaseInitialRows = @json(old('detail', $pembelian->exists ? $pembelian->detail->map(fn ($item) => ['produk_id' => $item->produk_id, 'satuan_produk_id' => $item->satuan_produk_id, 'jumlah' => $item->jumlah, 'harga_beli' => $item->harga_beli, 'diskon' => $item->diskon, 'catatan' => $item->catatan])->all() : []));
+        window.purchaseInitialRows = @json($initialPurchaseRows);
     </script>
     @vite('resources/js/pages/purchases.js')
 @endsection
