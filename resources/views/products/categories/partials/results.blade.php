@@ -73,12 +73,22 @@
                                                 <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">Hapus permanen</button>
                                             </form>
                                         @else
-                                            <button type="button" data-category-edit data-id="{{ $category->id }}" data-url="{{ route('categories.update', $category) }}" data-name="{{ $category->nama }}" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Edit</button>
+                                            <button type="button" data-category-edit data-id="{{ $category->id }}" data-url="{{ route('categories.update', $category) }}" data-name="{{ $category->nama }}" title="Edit kategori" aria-label="Edit kategori {{ $category->nama }}" class="rounded-lg p-2 text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                                                <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14.5 6.5 3 3M4 20l4.2-.8L19 8.4a2.12 2.12 0 0 0-3-3L5.2 16.2 4 20Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </button>
                                             <form method="POST" action="{{ route('categories.toggle-status', $category) }}" data-category-ajax-form>@csrf @method('PATCH')
-                                                <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100">{{ $category->aktif ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                                                <button type="submit" title="{{ $category->aktif ? 'Nonaktifkan kategori' : 'Aktifkan kategori' }}" aria-label="{{ $category->aktif ? 'Nonaktifkan' : 'Aktifkan' }} kategori {{ $category->nama }}" class="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400/30">
+                                                    @if($category->aktif)
+                                                        <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="6" stroke="currentColor" stroke-width="1.7"/><circle cx="15" cy="12" r="3" fill="currentColor"/></svg>
+                                                    @else
+                                                        <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="6" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="12" r="3" fill="currentColor"/></svg>
+                                                    @endif
+                                                </button>
                                             </form>
                                             <form method="POST" action="{{ route('categories.destroy', $category) }}" data-category-ajax-form data-confirm="Pindahkan kategori ini ke sampah?">@csrf @method('DELETE')
-                                                <button type="submit" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">Ke sampah</button>
+                                                <button type="submit" title="Pindahkan ke sampah" aria-label="Pindahkan kategori {{ $category->nama }} ke sampah" class="rounded-lg p-2 text-rose-600 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                </button>
                                             </form>
                                         @endif
                                     </div>
