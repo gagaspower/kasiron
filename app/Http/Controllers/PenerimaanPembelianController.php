@@ -1,17 +1,17 @@
 <?php
 
-namespace App\\Http\\Controllers;
+namespace App\Http\Controllers;
 
-use App\\Models\\MutasiStok;
-use App\\Models\\Pembelian;
-use App\\Models\\PenerimaanPembelian;
-use App\\Models\\Produk;
-use Illuminate\\Database\\Eloquent\\Builder;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Str;
-use Illuminate\\Validation\\ValidationException;
-use Illuminate\\View\\View;
+use App\Models\MutasiStok;
+use App\Models\Pembelian;
+use App\Models\PenerimaanPembelian;
+use App\Models\Produk;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class PenerimaanPembelianController extends Controller
 {
