@@ -71,5 +71,5 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/pages/product-form.js')
+    @vite('resources/js/pages/products.js')
 @endsection
