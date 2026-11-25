@@ -10,33 +10,20 @@ class DashboardController extends Controller
     {
         return view('dashboard', [
             'navigation' => [
-                ['label' => 'Dashboard', 'href' => '#dashboard', 'active' => true],
-                [
-                    'label' => 'Transaksi',
-                    'children' => [
-                        ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
-                        ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
-                    ],
-                ],
+                ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => true],
+                ['label' => 'Transaksi', 'children' => [
+                    ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
+                    ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
+                ]],
                 ['label' => 'Manajemen Toko', 'active' => false, 'children' => [
-                ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'disabled' => true, 'status' => 'Segera'],
-                ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
-            ]],
-                // [
-                //     'label' => 'Produk',
-                //     'children' => [
-                //         ['label' => 'Produk terlaris', 'href' => '#produk'],
-                //         ['label' => 'Stok menipis', 'href' => '#produk'],
-                //     ],
-                // ],
-                [
-                    'label' => 'Laporan',
-                    'children' => [
-                        ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
-                        ['label' => 'Pembayaran', 'href' => '#ringkasan'],
-                    ],
-                ],
+                    ['label' => 'Master', 'href' => route('products.index')],
+                    ['label' => 'Pembelian', 'href' => route('purchases.index')],
+                    ['label' => 'Persediaan', 'href' => route('inventory.index')],
+                ]],
+                ['label' => 'Laporan', 'children' => [
+                    ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
+                    ['label' => 'Pembayaran', 'href' => '#ringkasan'],
+                ]],
             ],
             'stats' => [
                 [
