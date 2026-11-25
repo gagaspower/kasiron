@@ -21,7 +21,7 @@
     @endif
 
     <section class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <form method="GET" action="{{ route('purchases.index') }}" class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <form method="GET" action="{{ route('purchases.transactions.index') }}" class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div><h2 class="font-semibold text-slate-900">Daftar pembelian</h2><p class="mt-1 text-xs text-slate-500">{{ $pembelians->total() }} transaksi ditemukan</p></div>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <input type="search" name="search" value="{{ $search }}" placeholder="Cari nomor / supplier..." class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 sm:w-64">
@@ -32,7 +32,7 @@
                     @endforeach
                 </select>
                 <button class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Filter</button>
-                @if($search || $status)<a href="{{ route('purchases.index') }}" class="rounded-xl px-3 py-2.5 text-center text-sm font-medium text-slate-500 hover:bg-slate-50">Reset</a>@endif
+                @if($search || $status)<a href="{{ route('purchases.transactions.index') }}" class="rounded-xl px-3 py-2.5 text-center text-sm font-medium text-slate-500 hover:bg-slate-50">Reset</a>@endif
             </div>
         </form>
 
