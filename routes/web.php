@@ -1,22 +1,42 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\SatuanController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\PembelianController;
-use App\Http\Controllers\PenerimaanPembelianController;
-use Illuminate\Support\Facades\Route;
+use App\\Http\\Controllers\\DashboardController;
+use App\\Http\\Controllers\\KategoriController;
+use App\\Http\\Controllers\\LoginController;
+use App\\Http\\Controllers\\ProdukController;
+use App\\Http\\Controllers\\SatuanController;
+use App\\Http\\Controllers\\SupplierController;
+use App\\Http\\Controllers\\PembelianController;
+use App\\Http\\Controllers\\PenerimaanPembelianController;
+use Illuminate\\Support\\Facades\\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1')->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('login.store');
 });
 
 Route::middleware('auth')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard
+    |--------------------------------------------------------------------------
+    */
+
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Main navigation pages
+    |--------------------------------------------------------------------------
+    */
 
     Route::get('/manajemen-produk', function () {
         return view('products.index', [
@@ -39,9 +59,6 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('products.index');
 
-    Route::get('/supplier/options', [SupplierController::class, 'options'])->name('suppliers.options');
-    Route::get('/produk/options', [PembelianController::class, 'productSearch'])->name('purchases.products.options');
-
     Route::get('/persediaan', function () {
         return view('inventory.index', [
             'navigation' => [
@@ -63,63 +80,135 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('inventory.index');
 
-    Route::get('/pembelian', [PembelianController::class, 'index'])->name('purchases.index');
-    Route::get('/pembelian/transaksi', [PembelianController::class, 'transactions'])->name('purchases.transactions.index');
-    Route::get('/pembelian/penerimaan', [PenerimaanPembelianController::class, 'index'])->name('purchases.receipts.index');
-    Route::get('/pembelian/{pembelian}/penerimaan/tambah', [PenerimaanPembelianController::class, 'create'])->name('purchases.receipts.create');
-    Route::post('/pembelian/{pembelian}/penerimaan', [PenerimaanPembelianController::class, 'store'])->name('purchases.receipts.store');
-    Route::get('/penerimaan/{penerimaan}', [PenerimaanPembelianController::class, 'show'])->name('purchases.receipts.show');
-    Route::get('/penerimaan/{penerimaan}/revisi', [PenerimaanPembelianController::class, 'edit'])->name('purchases.receipts.edit');
-    Route::put('/penerimaan/{penerimaan}', [PenerimaanPembelianController::class, 'update'])->name('purchases.receipts.update');
-    Route::patch('/penerimaan/{penerimaan}/batalkan', [PenerimaanPembelianController::class, 'cancel'])->name('purchases.receipts.cancel');
-    Route::patch('/penerimaan/{penerimaan}/konfirmasi', [PenerimaanPembelianController::class, 'confirm'])->name('purchases.receipts.confirm');
-    Route::get('/pembelian/pembayaran', fn () => view('purchases.payments', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.payments.index');
-    Route::get('/pembelian/tambah', [PembelianController::class, 'create'])->name('purchases.create');
-    Route::post('/pembelian', [PembelianController::class, 'store'])->name('purchases.store');
-    Route::get('/pembelian/{pembelian}/edit', [PembelianController::class, 'edit'])->name('purchases.edit');
-    Route::put('/pembelian/{pembelian}', [PembelianController::class, 'update'])->name('purchases.update');
-    Route::get('/pembelian/{pembelian}', [PembelianController::class, 'show'])->name('purchases.show');
-    Route::patch('/pembelian/{pembelian}/setujui', [PembelianController::class, 'approve'])->name('purchases.approve');
-    Route::delete('/pembelian/{pembelian}', [PembelianController::class, 'destroy'])->name('purchases.destroy');
+    /*
+    |--------------------------------------------------------------------------
+    | Purchase management
+    |--------------------------------------------------------------------------
+    */
 
-    Route::get('/produk', [ProdukController::class, 'index'])->name('products-master.index');
-    Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('products-master.create');
-    Route::post('/produk', [ProdukController::class, 'store'])->name('products-master.store');
-    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('products-master.edit');
-    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('products-master.update');
-    Route::patch('/produk/{produk}/status', [ProdukController::class, 'toggleStatus'])->name('products-master.toggle-status');
-    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('products-master.destroy');
-    Route::patch('/produk/{id}/restore', [ProdukController::class, 'restore'])->name('products-master.restore');
-    Route::delete('/produk/{id}/permanen', [ProdukController::class, 'forceDelete'])->name('products-master.force-delete');
-    Route::post('/produk/bulk-action', [ProdukController::class, 'bulkAction'])->name('products-master.bulk-action');
+    Route::prefix('pembelian')->name('purchases.')->group(function () {
+        Route::get('/', [PembelianController::class, 'index'])->name('index');
+        Route::get('/transaksi', [PembelianController::class, 'transactions'])->name('transactions.index');
 
+        Route::get('/penerimaan', [PenerimaanPembelianController::class, 'index'])
+            ->name('receipts.index');
+        Route::get('/{pembelian}/penerimaan/tambah', [PenerimaanPembelianController::class, 'create'])
+            ->name('receipts.create');
+        Route::post('/{pembelian}/penerimaan', [PenerimaanPembelianController::class, 'store'])
+            ->name('receipts.store');
+
+        Route::get('/pembayaran', fn () => view('purchases.payments', [
+            'navigation' => app(PembelianController::class)->navigationForView(),
+        ]))->name('payments.index');
+
+        Route::get('/tambah', [PembelianController::class, 'create'])->name('create');
+        Route::post('/', [PembelianController::class, 'store'])->name('store');
+        Route::get('/{pembelian}/edit', [PembelianController::class, 'edit'])->name('edit');
+        Route::put('/{pembelian}', [PembelianController::class, 'update'])->name('update');
+        Route::get('/{pembelian}', [PembelianController::class, 'show'])->name('show');
+        Route::patch('/{pembelian}/setujui', [PembelianController::class, 'approve'])->name('approve');
+        Route::delete('/{pembelian}', [PembelianController::class, 'destroy'])->name('destroy');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Goods receipt actions
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('penerimaan')->name('purchases.receipts.')->group(function () {
+        Route::get('/{penerimaan}', [PenerimaanPembelianController::class, 'show'])->name('show');
+        Route::get('/{penerimaan}/revisi', [PenerimaanPembelianController::class, 'edit'])->name('edit');
+        Route::put('/{penerimaan}', [PenerimaanPembelianController::class, 'update'])->name('update');
+        Route::patch('/{penerimaan}/batalkan', [PenerimaanPembelianController::class, 'cancel'])->name('cancel');
+        Route::patch('/{penerimaan}/konfirmasi', [PenerimaanPembelianController::class, 'confirm'])->name('confirm');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier and product lookup options
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/supplier/options', [SupplierController::class, 'options'])->name('suppliers.options');
+    Route::get('/produk/options', [PembelianController::class, 'productSearch'])->name('purchases.products.options');
     Route::get('/kategori/options', [ProdukController::class, 'categoryOptions'])->name('categories.options');
-    Route::get('/kategori', [KategoriController::class, 'index'])->name('categories.index');
-    Route::post('/kategori', [KategoriController::class, 'store'])->name('categories.store');
-    Route::put('/kategori/{kategori}', [KategoriController::class, 'update'])->name('categories.update');
-    Route::patch('/kategori/{kategori}/status', [KategoriController::class, 'toggleStatus'])->name('categories.toggle-status');
-    Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy'])->name('categories.destroy');
-    Route::patch('/kategori/{id}/restore', [KategoriController::class, 'restore'])->name('categories.restore');
-    Route::delete('/kategori/{id}/permanen', [KategoriController::class, 'forceDelete'])->name('categories.force-delete');
-    Route::post('/kategori/bulk-action', [KategoriController::class, 'bulkAction'])->name('categories.bulk-action');
 
-    Route::get('/satuan', [SatuanController::class, 'index'])->name('units.index');
-    Route::post('/satuan', [SatuanController::class, 'store'])->name('units.store');
-    Route::put('/satuan/{satuan}', [SatuanController::class, 'update'])->name('units.update');
-    Route::patch('/satuan/{satuan}/status', [SatuanController::class, 'toggleStatus'])->name('units.toggle-status');
-    Route::delete('/satuan/{satuan}', [SatuanController::class, 'destroy'])->name('units.destroy');
-    Route::patch('/satuan/{id}/restore', [SatuanController::class, 'restore'])->name('units.restore');
-    Route::delete('/satuan/{id}/permanen', [SatuanController::class, 'forceDelete'])->name('units.force-delete');
-    Route::post('/satuan/bulk-action', [SatuanController::class, 'bulkAction'])->name('units.bulk-action');
+    /*
+    |--------------------------------------------------------------------------
+    | Product master
+    |--------------------------------------------------------------------------
+    */
 
-    Route::get('/supplier', [SupplierController::class, 'index'])->name('suppliers.index');
-    Route::post('/supplier', [SupplierController::class, 'store'])->name('suppliers.store');
-    Route::put('/supplier/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
-    Route::patch('/supplier/{supplier}/status', [SupplierController::class, 'toggleStatus'])->name('suppliers.toggle-status');
-    Route::delete('/supplier/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
-    Route::patch('/supplier/{id}/restore', [SupplierController::class, 'restore'])->name('suppliers.restore');
-    Route::delete('/supplier/{id}/permanen', [SupplierController::class, 'forceDelete'])->name('suppliers.force-delete');
-    Route::post('/supplier/bulk-action', [SupplierController::class, 'bulkAction'])->name('suppliers.bulk-action');
+    Route::prefix('produk')->name('products-master.')->group(function () {
+        Route::get('/', [ProdukController::class, 'index'])->name('index');
+        Route::get('/tambah', [ProdukController::class, 'create'])->name('create');
+        Route::post('/', [ProdukController::class, 'store'])->name('store');
+        Route::post('/bulk-action', [ProdukController::class, 'bulkAction'])->name('bulk-action');
+        Route::get('/{produk}/edit', [ProdukController::class, 'edit'])->name('edit');
+        Route::put('/{produk}', [ProdukController::class, 'update'])->name('update');
+        Route::patch('/{produk}/status', [ProdukController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('/{id}/restore', [ProdukController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/permanen', [ProdukController::class, 'forceDelete'])->name('force-delete');
+        Route::delete('/{produk}', [ProdukController::class, 'destroy'])->name('destroy');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Category master
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('kategori')->name('categories.')->group(function () {
+        Route::get('/', [KategoriController::class, 'index'])->name('index');
+        Route::post('/', [KategoriController::class, 'store'])->name('store');
+        Route::post('/bulk-action', [KategoriController::class, 'bulkAction'])->name('bulk-action');
+        Route::put('/{kategori}', [KategoriController::class, 'update'])->name('update');
+        Route::patch('/{kategori}/status', [KategoriController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('/{id}/restore', [KategoriController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/permanen', [KategoriController::class, 'forceDelete'])->name('force-delete');
+        Route::delete('/{kategori}', [KategoriController::class, 'destroy'])->name('destroy');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unit master
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('satuan')->name('units.')->group(function () {
+        Route::get('/', [SatuanController::class, 'index'])->name('index');
+        Route::post('/', [SatuanController::class, 'store'])->name('store');
+        Route::put('/{satuan}', [SatuanController::class, 'update'])->name('update');
+        Route::patch('/{satuan}/status', [SatuanController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('/{id}/restore', [SatuanController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/permanen', [SatuanController::class, 'forceDelete'])->name('force-delete');
+        Route::delete('/{satuan}', [SatuanController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-action', [SatuanController::class, 'bulkAction'])->name('bulk-action');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier master
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('supplier')->name('suppliers.')->group(function () {
+        Route::get('/', [SupplierController::class, 'index'])->name('index');
+        Route::post('/', [SupplierController::class, 'store'])->name('store');
+        Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
+        Route::patch('/{supplier}/status', [SupplierController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('/{id}/restore', [SupplierController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/permanen', [SupplierController::class, 'forceDelete'])->name('force-delete');
+        Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-action', [SupplierController::class, 'bulkAction'])->name('bulk-action');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout
+    |--------------------------------------------------------------------------
+    */
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
