@@ -24,3 +24,7 @@
         @include('purchases.transactions.results')
     </div>
 @endsection
+
+@section('script')
+    @vite(['resources/js/pages/purchases.js'])
+@endsection
