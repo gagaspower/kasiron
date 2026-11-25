@@ -95,7 +95,7 @@ class ProdukController extends Controller
     {
         $produk->load(['satuanProduk' => fn ($query) => $query->withTrashed(), 'satuanProduk.satuan']);
 
-        return view('products.master.form', $this->formData() + [
+        return view('products.master.form', $this->formData($produk) + [
             'product' => $produk,
             'saleUnits' => $produk->satuanProduk->whereNull('deleted_at')->values(),
             'formTitle' => 'Edit Produk',
@@ -339,10 +339,31 @@ class ProdukController extends Controller
         $produk->satuanProduk()->whereNotIn('id', $keptIds)->get()->each(fn ($unit) => $unit->delete());
     }
 
-    private function formData(): array
+    public function categoryOptions(Request $request)
     {
+        $search = trim($request->string('q')->value());
+
+        $categories = Kategori::query()
+            ->where('aktif', true)
+            ->when($search !== '', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
+            ->orderBy('nama')
+            ->limit(20)
+            ->get(['id', 'nama']);
+
+        return response()->json([
+            'results' => $categories->map(fn (Kategori $category) => [
+                'id' => $category->id,
+                'text' => $category->nama,
+            ])->values(),
+        ]);
+    }
+
+    private function formData(?Produk $produk = null): array
+    {
+        $categoryId = old('kategori_id', $produk?->kategori_id);
+
         return [
-            'categories' => Kategori::query()->where('aktif', true)->orderBy('nama')->get(),
+            'selectedCategory' => $categoryId ? Kategori::query()->whereKey($categoryId)->first() : null,
             'units' => Satuan::query()->where('aktif', true)->orderBy('nama')->get(),
         ];
     }
