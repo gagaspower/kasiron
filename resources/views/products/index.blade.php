@@ -1,19 +1,19 @@
 @extends('layouts.products')
 
-@section('title', 'Manajemen Produk | KasirOn')
+@section('title', 'Master | KasirOn')
 
 @section('product-content')
     <div class="mb-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700/80">Pengaturan katalog</p>
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700/80">Data master toko</p>
         <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Manajemen Produk</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Kelola etalase, satuan, dan informasi produk toko Anda dari satu tempat.</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Master</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Kelola data produk, kategori, satuan, dan supplier toko Anda dari satu tempat.</p>
             </div>
         </div>
     </div>
 
-    <section aria-label="Menu manajemen produk" class="grid gap-4 lg:grid-cols-3">
+    <section aria-label="Menu master toko" class="grid gap-4 lg:grid-cols-3">
         <a href="{{ route('categories.index') }}" class="group flex min-h-[112px] items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/[0.06] focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:p-6">
             <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-100/80 transition group-hover:bg-blue-100"><svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.75A1.75 1.75 0 0 1 5.75 4h12.5A1.75 1.75 0 0 1 20 5.75v12.5A1.75 1.75 0 0 1 18.25 20H5.75A1.75 1.75 0 0 1 4 18.25V5.75Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 9h15M9 9v10.5M9 13h10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             <span class="min-w-0 flex-1"><span class="block text-base font-semibold text-slate-900">Etalase / Kategori</span><span class="mt-1 block text-sm leading-5 text-slate-500">Atur pengelompokan dan tampilan kategori produk.</span></span>
