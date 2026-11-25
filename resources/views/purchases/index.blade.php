@@ -14,7 +14,7 @@
     </div>
 
     <section aria-label="Menu pembelian" class="grid gap-4 lg:grid-cols-3">
-        <div class="flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] sm:p-6">
+        <a href="{{ route('purchases.transactions.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg sm:p-6">
             <div class="flex items-start justify-between gap-3">
                 <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-100/80">
                     <svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -28,9 +28,10 @@
                 <h2 class="text-base font-semibold text-slate-900">Transaksi Pembelian</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat barang yang dibeli dari supplier, termasuk rincian produk, jumlah, harga, dan total pembelian.</p>
             </div>
-        </div>
+            <span class="mt-auto pt-4 text-xs font-semibold text-blue-700">Buka transaksi <span aria-hidden="true">→</span></span>
+        </a>
 
-        <div class="flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] sm:p-6">
+        <a href="{{ route('purchases.receipts.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg sm:p-6">
             <div class="flex items-start justify-between gap-3">
                 <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100/80">
                     <svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -46,9 +47,10 @@
                 <h2 class="text-base font-semibold text-slate-900">Penerimaan Barang</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat dan konfirmasi barang yang benar-benar diterima. Stok bertambah setelah penerimaan dikonfirmasi.</p>
             </div>
-        </div>
+            <span class="mt-auto pt-4 text-xs font-semibold text-emerald-700">Buka penerimaan <span aria-hidden="true">→</span></span>
+        </a>
 
-        <div class="flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] sm:p-6">
+        <a href="{{ route('purchases.payments.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg sm:p-6">
             <div class="flex items-start justify-between gap-3">
                 <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-100/80">
                     <svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -62,6 +64,7 @@
                 <h2 class="text-base font-semibold text-slate-900">Pembayaran Pembelian</h2>
                 <p class="mt-1 text-sm leading-5 text-slate-500">Catat pembayaran pembelian, baik pembayaran langsung maupun pembayaran bertahap kepada supplier.</p>
             </div>
-        </div>
+            <span class="mt-auto pt-4 text-xs font-semibold text-violet-700">Buka pembayaran <span aria-hidden="true">→</span></span>
+        </a>
     </section>
 @endsection
