@@ -530,7 +530,7 @@ if (receiptResults) {
     });
 
     document.addEventListener("click", async event => {
-        const link = event.target.closest("[data-receipt-results] nav a, [data-receipt-results] a[rel='next'], [data-receipt-results] a[rel='prev']");
+        const link = event.target.closest("[data-receipt-reset], [data-receipt-results] nav a, [data-receipt-results] a[rel='next'], [data-receipt-results] a[rel='prev']");
         if (!link?.href) return;
         event.preventDefault();
         window.clearTimeout(receiptSearchTimer);
