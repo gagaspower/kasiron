@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'satuan_dasar_id',
     'jumlah_stok',
     'stok_minimum',
+    'kelola_stok',
     'aktif',
 ])]
 class Produk extends Model
@@ -47,6 +48,21 @@ class Produk extends Model
     }
 
     /**
+     * Get stock movement history for this product.
+     *
+     * @return HasMany<MutasiStok, $this>
+     */
+    public function mutasiStok(): HasMany
+    {
+        return $this->hasMany(MutasiStok::class, 'produk_id', 'id');
+    }
+
+    public function satuanDasar(): BelongsTo
+    {
+        return $this->belongsTo(Satuan::class, 'satuan_dasar_id');
+    }
+
+    /**
      * Get the attribute casts.
      *
      * @return array<string, string>
@@ -56,13 +72,8 @@ class Produk extends Model
         return [
             'jumlah_stok' => 'decimal:6',
             'stok_minimum' => 'decimal:6',
+            'kelola_stok' => 'boolean',
             'aktif' => 'boolean',
         ];
-    }
-
-
-    public function satuanDasar(): BelongsTo
-    {
-        return $this->belongsTo(Satuan::class, 'satuan_dasar_id');
     }
 }
