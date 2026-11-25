@@ -190,7 +190,11 @@ class KategoriController extends Controller
             ]],
             ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
                 ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'href' => route('purchases.index')],
+                ['label' => 'Pembelian', 'children' => [
+                    ['label' => 'Transaksi Pembelian', 'href' => route('purchases.transactions.index')],
+                    ['label' => 'Penerimaan Barang', 'href' => route('purchases.receipts.index')],
+                    ['label' => 'Pembayaran Pembelian', 'href' => route('purchases.payments.index')],
+                ]],
                 ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
             ]],
             ['label' => 'Laporan', 'children' => [
