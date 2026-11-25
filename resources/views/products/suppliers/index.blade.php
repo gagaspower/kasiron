@@ -6,7 +6,7 @@
     <div class="mb-7">
         <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-emerald-700">
             <svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="m14 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Manajemen Produk
+            Master
         </a>
         <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
