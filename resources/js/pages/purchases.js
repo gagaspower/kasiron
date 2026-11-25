@@ -142,8 +142,10 @@ const bindSearchPicker = ({ picker, input, valueInput, box, clearButton, emptyTe
     return { close: () => closePicker(box, input), search };
 };
 
-const supplierPicker = document.querySelector("[data-purchase-supplier-picker]");
-if (supplierPicker) {
+const bindSupplierPicker = root => {
+    const supplierPicker = root.querySelector("[data-purchase-supplier-picker]");
+    if (!supplierPicker || supplierPicker.dataset.bound === "true") return;
+    supplierPicker.dataset.bound = "true";
     const input = supplierPicker.querySelector("[data-purchase-supplier-search]");
     const valueInput = supplierPicker.querySelector("[data-purchase-supplier-value]");
     const box = supplierPicker.querySelector("[data-purchase-supplier-options]");
@@ -159,7 +161,8 @@ if (supplierPicker) {
             closePicker(box, input);
         },
     });
-}
+};
+bindSupplierPicker(document);
 
 const updateUnits = (row, units = [], selectedUnit = "") => {
     const unitSelect = field(row, "satuan_produk_id");
@@ -436,5 +439,107 @@ if (purchaseResults) {
     window.addEventListener("popstate", async () => {
         try { await refreshPurchaseResults(window.location.href, false); }
         catch (error) { showPurchaseNotice(error.message); setPurchaseLoading(false); }
+    });
+}
+
+
+// Receipt listing: AJAX search, date/supplier filters, pagination, and loading feedback.
+const receiptResults = document.querySelector("[data-receipt-results]");
+if (receiptResults) {
+    let receiptSearchTimer;
+    let receiptRequest = 0;
+    let receiptLoadingOverlay = null;
+
+    const setReceiptLoading = loading => {
+        if (loading) {
+            if (receiptLoadingOverlay) return;
+            receiptResults.classList.add("relative", "min-h-[160px]");
+            receiptResults.setAttribute("aria-busy", "true");
+            receiptLoadingOverlay = document.createElement("div");
+            receiptLoadingOverlay.className = "absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-[1px]";
+            receiptLoadingOverlay.innerHTML = '<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm"><span class="size-5 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-600"></span><span>Memuat data...</span></div>';
+            receiptResults.append(receiptLoadingOverlay);
+        } else {
+            receiptLoadingOverlay?.remove();
+            receiptLoadingOverlay = null;
+            receiptResults.removeAttribute("aria-busy");
+        }
+    };
+
+    const showReceiptNotice = message => {
+        let notice = document.querySelector("[data-receipt-list-notice]");
+        if (!notice) {
+            notice = document.createElement("div");
+            notice.dataset.receiptListNotice = "";
+            notice.className = "mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700";
+            receiptResults.before(notice);
+        }
+        notice.textContent = message;
+    };
+
+    const refreshReceiptResults = async (url, pushHistory = true) => {
+        const requestId = ++receiptRequest;
+        const target = new URL(url, window.location.origin);
+        setReceiptLoading(true);
+        try {
+            const response = await fetch(target, { headers: { "X-Requested-With": "XMLHttpRequest", Accept: "text/html" } });
+            if (!response.ok) throw new Error("Tidak dapat memuat daftar penerimaan barang.");
+            const html = await response.text();
+            if (requestId !== receiptRequest) return;
+            const parsed = new DOMParser().parseFromString(html, "text/html");
+            const updated = parsed.querySelector("[data-receipt-results]");
+            if (!updated) throw new Error("Struktur daftar penerimaan tidak ditemukan.");
+            receiptResults.innerHTML = updated.innerHTML;
+            bindSupplierPicker(receiptResults);
+            if (pushHistory) window.history.pushState({}, "", target);
+            document.querySelector("[data-receipt-list-notice]")?.remove();
+        } finally {
+            if (requestId === receiptRequest) setReceiptLoading(false);
+        }
+    };
+
+    const receiptFormUrl = form => {
+        const url = new URL(form.action, window.location.origin);
+        for (const [key, value] of new FormData(form).entries()) {
+            if (String(value).trim()) url.searchParams.set(key, value);
+            else url.searchParams.delete(key);
+        }
+        url.searchParams.delete("menunggu_page");
+        url.searchParams.delete("riwayat_page");
+        return url;
+    };
+
+    document.addEventListener("submit", async event => {
+        const form = event.target.closest("[data-receipt-search-form], [data-receipt-filter-form]");
+        if (!form) return;
+        event.preventDefault();
+        window.clearTimeout(receiptSearchTimer);
+        try { await refreshReceiptResults(receiptFormUrl(form)); }
+        catch (error) { showReceiptNotice(error.message); setReceiptLoading(false); }
+    });
+
+    document.addEventListener("input", event => {
+        if (!event.target.matches("[data-receipt-search]")) return;
+        window.clearTimeout(receiptSearchTimer);
+        receiptSearchTimer = window.setTimeout(async () => {
+            const form = receiptResults.querySelector("[data-receipt-search-form]");
+            if (!form) return;
+            try { await refreshReceiptResults(receiptFormUrl(form)); }
+            catch (error) { showReceiptNotice(error.message); setReceiptLoading(false); }
+        }, 350);
+    });
+
+    document.addEventListener("click", async event => {
+        const link = event.target.closest("[data-receipt-results] nav a, [data-receipt-results] a[rel='next'], [data-receipt-results] a[rel='prev']");
+        if (!link?.href) return;
+        event.preventDefault();
+        window.clearTimeout(receiptSearchTimer);
+        try { await refreshReceiptResults(link.href); }
+        catch (error) { showReceiptNotice(error.message); setReceiptLoading(false); }
+    });
+
+    window.addEventListener("popstate", async () => {
+        try { await refreshReceiptResults(window.location.href, false); }
+        catch (error) { showReceiptNotice(error.message); setReceiptLoading(false); }
     });
 }
