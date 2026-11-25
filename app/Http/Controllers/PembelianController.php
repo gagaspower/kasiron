@@ -21,7 +21,7 @@ class PembelianController extends Controller
         ]);
     }
 
-    public function transactions(Request $request): View
+    public function transactions(Request $request)
     {
         $search = trim($request->string('search')->value());
         $status = $request->string('status')->value();
@@ -40,10 +40,20 @@ class PembelianController extends Controller
             ->withPath(route('purchases.transactions.index'))
             ->withQueryString();
 
-        return view('purchases.transactions.index', [
+        $data = [
             'pembelians' => $pembelians,
             'search' => $search,
             'status' => $status,
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'html' => view('purchases.transactions.results', $data)->render(),
+                'url' => $request->fullUrl(),
+            ]);
+        }
+
+        return view('purchases.transactions.index', $data + [
             'navigation' => $this->navigation(),
         ]);
     }
