@@ -8,6 +8,7 @@ use App\Models\Produk;
 use App\Models\Satuan;
 use App\Models\SatuanProduk;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -16,7 +17,7 @@ use Illuminate\View\View;
 
 class ProdukController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $trash = $request->string('status')->value() === 'trash';
         $search = trim($request->string('search')->value());
