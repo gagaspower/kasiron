@@ -12,13 +12,21 @@
         <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Periksa kembali data pembelian.</p><ul class="mt-2 list-inside list-disc">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
 
-    <form method="POST" action="{{ $formAction }}" class="space-y-6" data-purchase-form data-products='@json($productOptions)'>
+    <form method="POST" action="{{ $formAction }}" class="space-y-6" data-purchase-form>
         @csrf
         @if($formMethod !== 'POST')@method($formMethod)@endif
         <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <div class="mb-5"><h2 class="font-semibold text-slate-900">Informasi Pembelian</h2><p class="mt-1 text-sm text-slate-500">Pilih supplier dan tanggal transaksi.</p></div>
             <div class="grid gap-4 md:grid-cols-2">
-                <div><label class="mb-2 block text-sm font-medium text-slate-700">Supplier <span class="text-rose-500">*</span></label><select name="supplier_id" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"><option value="">Pilih supplier</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected(old('supplier_id', $pembelian->supplier_id) === $supplier->id)>{{ $supplier->nama }}</option>@endforeach</select></div>
+                <div class="relative" data-purchase-supplier-picker data-options-url="{{ route('suppliers.options') }}">
+                    <label for="purchase-supplier-search" class="mb-2 block text-sm font-medium text-slate-700">Supplier <span class="text-rose-500">*</span></label>
+                    <input type="hidden" name="supplier_id" value="{{ old('supplier_id', $pembelian->supplier_id) }}" data-purchase-supplier-value>
+                    <div class="relative">
+                        <input id="purchase-supplier-search" type="text" autocomplete="off" value="{{ old('supplier_id') ? $suppliers->firstWhere('id', old('supplier_id'))?->nama : $pembelian->supplier?->nama }}" placeholder="Cari supplier..." data-purchase-supplier-search aria-controls="purchase-supplier-options" aria-expanded="false" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 pr-10 text-sm outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10">
+                        <button type="button" data-purchase-supplier-clear aria-label="Hapus supplier" class="absolute inset-y-0 right-0 hidden items-center px-3 text-slate-400 hover:text-rose-600">×</button>
+                    </div>
+                    <div id="purchase-supplier-options" data-purchase-supplier-options class="absolute z-30 mt-1 hidden max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg" role="listbox"></div>
+                </div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Nomor faktur supplier</label><input name="nomor_faktur_supplier" value="{{ old('nomor_faktur_supplier', $pembelian->nomor_faktur_supplier) }}" maxlength="100" placeholder="Opsional" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal pembelian <span class="text-rose-500">*</span></label><input type="date" name="tanggal_pembelian" value="{{ old('tanggal_pembelian', $pembelian->tanggal_pembelian?->format('Y-m-d')) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal jatuh tempo</label><input type="date" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $pembelian->tanggal_jatuh_tempo?->format('Y-m-d')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
@@ -33,7 +41,15 @@
                 <div class="rounded-xl border border-slate-200 p-4" data-purchase-row>
                     <div class="mb-3 flex items-center justify-between"><span class="text-sm font-semibold text-slate-700">Item <span data-purchase-row-number></span></span><button type="button" data-purchase-remove-row class="rounded-lg p-2 text-rose-600 hover:bg-rose-50" title="Hapus item" aria-label="Hapus item"><svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="sm:col-span-2"><label class="mb-1.5 block text-xs font-medium text-slate-600">Produk</label><select data-field="produk_id" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="">Pilih produk</option></select></div>
+                        <div class="relative sm:col-span-2" data-purchase-product-picker data-options-url="{{ route('purchases.products.options') }}">
+                            <label class="mb-1.5 block text-xs font-medium text-slate-600">Produk</label>
+                            <input type="hidden" data-field="produk_id" required>
+                            <div class="relative">
+                                <input type="text" autocomplete="off" placeholder="Cari nama produk, SKU, atau barcode..." data-purchase-product-search aria-expanded="false" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-10 text-sm outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10">
+                                <button type="button" data-purchase-product-clear aria-label="Hapus produk" class="absolute inset-y-0 right-0 hidden items-center px-3 text-slate-400 hover:text-rose-600">×</button>
+                            </div>
+                            <div data-purchase-product-options class="absolute z-30 mt-1 hidden max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg" role="listbox"></div>
+                        </div>
                         <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Satuan</label><select data-field="satuan_produk_id" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="">Pilih satuan</option></select></div>
                         <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Jumlah</label><input data-field="jumlah" type="number" min="0.000001" step="0.000001" value="1" required class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></div>
                         <div><label class="mb-1.5 block text-xs font-medium text-slate-600">Harga beli / satuan (Rp)</label><input data-field="harga_beli" type="number" min="0" step="0.01" value="0" required class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></div>
