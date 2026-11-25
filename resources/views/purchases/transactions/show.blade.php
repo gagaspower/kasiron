@@ -3,6 +3,10 @@
 @section('title', $pembelian->nomor_pembelian.' | KasirOn')
 
 @section('product-content')
+    @php
+        $formatNumber = fn ($value, $precision = 2) => rtrim(rtrim(number_format((float) $value, $precision, ',', '.'), '0'), ',');
+    @endphp
+
     <div class="mb-7">
         <a href="{{ route('purchases.index') }}" class="text-sm font-medium text-slate-500 hover:text-emerald-700">← Daftar Pembelian</a>
         <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -25,13 +29,13 @@
             </div>
             <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-5 py-4"><h2 class="font-semibold text-slate-900">Rincian Produk</h2></div>
-                <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Produk</th><th class="px-3 py-3 text-right">Jumlah</th><th class="px-3 py-3">Satuan</th><th class="px-3 py-3 text-right">Harga</th><th class="px-5 py-3 text-right">Subtotal</th></tr></thead><tbody class="divide-y divide-slate-100">@foreach($pembelian->detail as $detail)<tr><td class="px-5 py-4"><p class="font-semibold text-slate-800">{{ $detail->nama_produk }}</p>@if($detail->kode_sku)<p class="mt-1 text-xs text-slate-400">{{ $detail->kode_sku }}</p>@endif</td><td class="px-3 py-4 text-right tabular-nums">{{ number_format((float)$detail->jumlah, 3, ',', '.') }}</td><td class="px-3 py-4 text-slate-600">{{ $detail->nama_satuan }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ number_format((float)$detail->harga_beli, 0, ',', '.') }}</td><td class="px-5 py-4 text-right font-semibold tabular-nums">Rp {{ number_format((float)$detail->subtotal, 0, ',', '.') }}</td></tr>@endforeach</tbody></table></div>
+                <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Produk</th><th class="px-3 py-3 text-right">Jumlah</th><th class="px-3 py-3">Satuan</th><th class="px-3 py-3 text-right">Harga</th><th class="px-5 py-3 text-right">Subtotal</th></tr></thead><tbody class="divide-y divide-slate-100">@foreach($pembelian->detail as $detail)<tr><td class="px-5 py-4"><p class="font-semibold text-slate-800">{{ $detail->nama_produk }}</p>@if($detail->kode_sku)<p class="mt-1 text-xs text-slate-400">{{ $detail->kode_sku }}</p>@endif</td><td class="px-3 py-4 text-right tabular-nums">{{ $formatNumber($detail->jumlah, 6) }}</td><td class="px-3 py-4 text-slate-600">{{ $detail->nama_satuan }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ $formatNumber($detail->harga_beli, 2) }}</td><td class="px-5 py-4 text-right font-semibold tabular-nums">Rp {{ $formatNumber($detail->subtotal, 2) }}</td></tr>@endforeach</tbody></table></div>
             </div>
         </section>
         <aside class="space-y-5">
             <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                 <h2 class="font-semibold text-slate-900">Ringkasan</h2>
-                <div class="mt-4 space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span>Rp {{ number_format((float)$pembelian->subtotal,0,',','.') }}</span></div><div class="flex justify-between"><span class="text-slate-500">Diskon</span><span>Rp {{ number_format((float)$pembelian->diskon,0,',','.') }}</span></div><div class="flex justify-between"><span class="text-slate-500">Biaya lain</span><span>Rp {{ number_format((float)$pembelian->biaya_lain,0,',','.') }}</span></div><div class="flex justify-between border-t border-slate-100 pt-3 text-base font-bold"><span>Total</span><span class="text-emerald-700">Rp {{ number_format((float)$pembelian->total,0,',','.') }}</span></div></div>
+                <div class="mt-4 space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span>Rp {{ $formatNumber($pembelian->subtotal, 2) }}</span></div><div class="flex justify-between"><span class="text-slate-500">Diskon</span><span>Rp {{ $formatNumber($pembelian->diskon, 2) }}</span></div><div class="flex justify-between"><span class="text-slate-500">Biaya lain</span><span>Rp {{ $formatNumber($pembelian->biaya_lain, 2) }}</span></div><div class="flex justify-between border-t border-slate-100 pt-3 text-base font-bold"><span>Total</span><span class="text-emerald-700">Rp {{ $formatNumber($pembelian->total, 2) }}</span></div></div>
             </section>
             <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                 <h2 class="font-semibold text-slate-900">Tindakan</h2>
