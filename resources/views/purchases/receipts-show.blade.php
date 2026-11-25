@@ -12,4 +12,9 @@
         @if($penerimaan->status === 'draft')<div class="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 p-5 sm:flex-row sm:items-center sm:justify-between"><p class="max-w-xl text-xs leading-5 text-slate-500">Pastikan jumlah barang sudah sesuai kondisi fisik. Setelah dikonfirmasi, stok produk yang mengelola stok akan bertambah dan mutasi stok dicatat.</p><form method="POST" action="{{ route('purchases.receipts.confirm', $penerimaan) }}">@csrf @method('PATCH')<button class="w-full rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 sm:w-auto">Konfirmasi Penerimaan</button></form></div>
         @else<div class="border-t border-emerald-100 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">Penerimaan telah dikonfirmasi pada {{ $penerimaan->diterima_pada?->format('d M Y H:i') }}. Stok sudah diperbarui.</div>@endif
     </section>
+    <dialog data-purchase-confirm class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/40"><div class="p-6"><h2 class="text-lg font-bold text-slate-900">Konfirmasi penerimaan</h2><p data-purchase-confirm-message class="mt-2 text-sm leading-6 text-slate-500"></p></div><div class="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-6 py-4"><button type="button" data-purchase-confirm-cancel class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600">Batal</button><button type="button" data-purchase-confirm-accept class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white">Ya, konfirmasi</button></div></dialog>
+@endsection
+
+@section('script')
+    @vite('resources/js/pages/purchases.js')
 @endsection
