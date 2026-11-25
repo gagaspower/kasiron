@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/produk/{id}/permanen', [ProdukController::class, 'forceDelete'])->name('products-master.force-delete');
     Route::post('/produk/bulk-action', [ProdukController::class, 'bulkAction'])->name('products-master.bulk-action');
 
+    Route::get('/kategori/options', [ProdukController::class, 'categoryOptions'])->name('categories.options');
     Route::get('/kategori', [KategoriController::class, 'index'])->name('categories.index');
     Route::post('/kategori', [KategoriController::class, 'store'])->name('categories.store');
     Route::put('/kategori/{kategori}', [KategoriController::class, 'update'])->name('categories.update');
