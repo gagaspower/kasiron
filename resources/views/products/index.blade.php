@@ -31,5 +31,10 @@
             <span class="min-w-0 flex-1"><span class="block text-base font-semibold text-slate-900">Produk</span><span class="mt-1 block text-sm leading-5 text-slate-500">Kelola daftar produk, harga, dan informasi stok.</span></span>
             <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition group-hover:translate-x-1 group-hover:bg-teal-50 group-hover:text-teal-700"><svg class="size-5" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M8 7h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </a>
+        <a href="{{ route('suppliers.index') }}" class="group flex min-h-[112px] items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-900/[0.06] focus:outline-none focus:ring-4 focus:ring-emerald-500/10 sm:p-6">
+            <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100/80 transition group-hover:bg-emerald-100"><svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 8h5m-2.5-2.5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="min-w-0 flex-1"><span class="block text-base font-semibold text-slate-900">Supplier</span><span class="mt-1 block text-sm leading-5 text-slate-500">Kelola data pemasok untuk transaksi pembelian.</span></span>
+            <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition group-hover:translate-x-1 group-hover:bg-emerald-50 group-hover:text-emerald-700"><svg class="size-5" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M8 7h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
     </section>
 @endsection
