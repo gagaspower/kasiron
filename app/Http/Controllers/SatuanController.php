@@ -196,10 +196,10 @@ class SatuanController extends Controller
             ]],
             ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
                 ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'children' => [
-                    ['label' => 'Transaksi Pembelian', 'href' => route('purchases.transactions.index')],
-                    ['label' => 'Penerimaan Barang', 'href' => route('purchases.receipts.index')],
-                    ['label' => 'Pembayaran Pembelian', 'href' => route('purchases.payments.index')],
+                ['label' => 'Pembelian', 'active' => request()->routeIs('purchases.*'), 'children' => [
+                    ['label' => 'Transaksi Pembelian', 'href' => route('purchases.transactions.index'), 'active' => request()->routeIs('purchases.transactions.*', 'purchases.create', 'purchases.store', 'purchases.edit', 'purchases.update', 'purchases.show', 'purchases.approve', 'purchases.destroy')],
+                    ['label' => 'Penerimaan Barang', 'href' => route('purchases.receipts.index'), 'active' => request()->routeIs('purchases.receipts.*')],
+                    ['label' => 'Pembayaran Pembelian', 'href' => route('purchases.payments.index'), 'active' => request()->routeIs('purchases.payments.*')],
                 ]],
                 ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
             ]],
