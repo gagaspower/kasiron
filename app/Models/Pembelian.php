@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'nomor_faktur_supplier',
     'tanggal_pembelian',
     'tanggal_jatuh_tempo',
+    'jenis_pembayaran',
     'status',
     'subtotal',
     'diskon',
@@ -43,6 +44,10 @@ class Pembelian extends Model
     public const STATUS_DITERIMA = 'diterima';
 
     public const STATUS_DIBATALKAN = 'dibatalkan';
+
+    public const JENIS_PEMBAYARAN_TUNAI = 'tunai';
+
+    public const JENIS_PEMBAYARAN_KREDIT = 'kredit';
 
     public function supplier(): BelongsTo
     {
