@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PembelianController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -37,26 +38,14 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('products.index');
 
-    Route::get('/pembelian', function () {
-        return view('purchases.index', [
-            'navigation' => [
-                ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => false],
-                ['label' => 'Transaksi', 'children' => [
-                    ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
-                    ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
-                ]],
-                ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
-                    ['label' => 'Master', 'href' => route('products.index')],
-                    ['label' => 'Pembelian', 'href' => route('purchases.index')],
-                    ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
-                ]],
-                ['label' => 'Laporan', 'children' => [
-                    ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
-                    ['label' => 'Pembayaran', 'href' => '#ringkasan'],
-                ]],
-            ],
-        ]);
-    })->name('purchases.index');
+    Route::get('/pembelian', [PembelianController::class, 'index'])->name('purchases.index');
+    Route::get('/pembelian/tambah', [PembelianController::class, 'create'])->name('purchases.create');
+    Route::post('/pembelian', [PembelianController::class, 'store'])->name('purchases.store');
+    Route::get('/pembelian/{pembelian}/edit', [PembelianController::class, 'edit'])->name('purchases.edit');
+    Route::put('/pembelian/{pembelian}', [PembelianController::class, 'update'])->name('purchases.update');
+    Route::get('/pembelian/{pembelian}', [PembelianController::class, 'show'])->name('purchases.show');
+    Route::patch('/pembelian/{pembelian}/setujui', [PembelianController::class, 'approve'])->name('purchases.approve');
+    Route::delete('/pembelian/{pembelian}', [PembelianController::class, 'destroy'])->name('purchases.destroy');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('products-master.index');
     Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('products-master.create');
