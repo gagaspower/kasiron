@@ -250,11 +250,13 @@ class PembelianController extends Controller
     public function productSearch(Request $request)
     {
         $search = trim($request->string('q')->value());
+        $selectedId = $request->string('id')->value();
 
         $products = Produk::query()
             ->where('aktif', true)
             ->whereNull('deleted_at')
-            ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($search) {
+            ->when($selectedId !== '', fn (Builder $query) => $query->whereKey($selectedId))
+            ->when($selectedId === '' && $search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($search) {
                 $query->where('nama', 'like', "%{$search}%")
                     ->orWhere('kode_sku', 'like', "%{$search}%")
                     ->orWhereHas('satuanProduk', fn (Builder $unit) => $unit->where('barcode', 'like', "%{$search}%"));
