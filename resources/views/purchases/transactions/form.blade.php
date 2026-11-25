@@ -29,43 +29,23 @@
                 </div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Nomor faktur supplier</label><input name="nomor_faktur_supplier" value="{{ old('nomor_faktur_supplier', $pembelian->nomor_faktur_supplier) }}" maxlength="100" placeholder="Opsional" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal pembelian <span class="text-rose-500">*</span></label><input type="date" name="tanggal_pembelian" value="{{ old('tanggal_pembelian', $pembelian->tanggal_pembelian?->format('Y-m-d')) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
-                <div class="md:col-span-2">
+                <div>
                     <span class="mb-2 block text-sm font-medium text-slate-700">Jenis pembayaran <span class="text-rose-500">*</span></span>
                     @php($jenisPembayaran = old('jenis_pembayaran', $pembelian->jenis_pembayaran ?? 'tunai'))
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <label class="group relative block cursor-pointer">
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
                             <input type="radio" name="jenis_pembayaran" value="tunai" data-purchase-payment-type required @checked($jenisPembayaran === 'tunai') class="peer sr-only">
-                            <div class="flex h-full items-start gap-3 rounded-2xl border-2 border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/40 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
-                                <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition peer-checked:bg-emerald-100 peer-checked:text-emerald-700 group-has-[:checked]:bg-emerald-100 group-has-[:checked]:text-emerald-700">
-                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M7 15h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="flex items-center justify-between gap-2">
-                                        <span class="font-semibold text-slate-900">Tunai</span>
-                                        <span class="flex size-5 items-center justify-center rounded-full border-2 border-slate-300 text-transparent transition peer-checked:border-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white group-has-[:checked]:border-emerald-600 group-has-[:checked]:bg-emerald-600 group-has-[:checked]:text-white">
-                                            <svg class="size-3" viewBox="0 0 16 16" fill="none"><path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                        </span>
-                                    </span>
-                                    <span class="mt-1 block text-sm leading-5 text-slate-500">Pembayaran dilakukan secara langsung atau saat transaksi.</span>
-                                </span>
-                            </div>
+                            <span class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M7 15h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                                Tunai
+                            </span>
                         </label>
-                        <label class="group relative block cursor-pointer">
+                        <label class="cursor-pointer">
                             <input type="radio" name="jenis_pembayaran" value="kredit" data-purchase-payment-type required @checked($jenisPembayaran === 'kredit') class="peer sr-only">
-                            <div class="flex h-full items-start gap-3 rounded-2xl border-2 border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/40 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
-                                <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-has-[:checked]:bg-emerald-100 group-has-[:checked]:text-emerald-700">
-                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="flex items-center justify-between gap-2">
-                                        <span class="font-semibold text-slate-900">Kredit / Tempo</span>
-                                        <span class="flex size-5 items-center justify-center rounded-full border-2 border-slate-300 text-transparent transition group-has-[:checked]:border-emerald-600 group-has-[:checked]:bg-emerald-600 group-has-[:checked]:text-white">
-                                            <svg class="size-3" viewBox="0 0 16 16" fill="none"><path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                        </span>
-                                    </span>
-                                    <span class="mt-1 block text-sm leading-5 text-slate-500">Pembayaran dilakukan kemudian sesuai tanggal jatuh tempo.</span>
-                                </span>
-                            </div>
+                            <span class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Kredit / Tempo
+                            </span>
                         </label>
                     </div>
                 </div>
