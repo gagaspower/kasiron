@@ -67,8 +67,9 @@ class PembelianController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validatePurchase($request);
+        $proses = $request->validate(['proses' => ['required', 'in:draft,setujui']])['proses'];
 
-        $pembelian = DB::transaction(function () use ($validated, $request) {
+        $pembelian = DB::transaction(function () use ($validated, $request, $proses) {
             $subtotal = collect($validated['detail'])->sum(fn ($row) => ((float) $row['jumlah'] * (float) $row['harga_beli']) - (float) ($row['diskon'] ?? 0));
             $diskon = (float) ($validated['diskon'] ?? 0);
             if ($diskon > $subtotal) {
@@ -81,13 +82,15 @@ class PembelianController extends Controller
                 'nomor_faktur_supplier' => $validated['nomor_faktur_supplier'] ?? null,
                 'tanggal_pembelian' => $validated['tanggal_pembelian'],
                 'tanggal_jatuh_tempo' => $validated['tanggal_jatuh_tempo'] ?? null,
-                'status' => Pembelian::STATUS_DRAFT,
+                'status' => $proses === 'setujui' ? Pembelian::STATUS_DISETUJUI : Pembelian::STATUS_DRAFT,
                 'subtotal' => $subtotal,
                 'diskon' => $diskon,
                 'biaya_lain' => $validated['biaya_lain'] ?? 0,
                 'total' => $subtotal - $diskon + (float) ($validated['biaya_lain'] ?? 0),
                 'catatan' => $validated['catatan'] ?? null,
                 'dibuat_oleh' => $request->user()->id,
+                'disetujui_oleh' => $proses === 'setujui' ? $request->user()->id : null,
+                'disetujui_pada' => $proses === 'setujui' ? now() : null,
             ]);
 
             $this->syncDetails($pembelian, $validated['detail']);
@@ -95,7 +98,11 @@ class PembelianController extends Controller
             return $pembelian;
         });
 
-        return redirect()->route('purchases.show', $pembelian)->with('success', 'Draft pembelian berhasil dibuat.');
+        $message = $proses === 'setujui'
+            ? 'Pembelian berhasil dibuat dan langsung disetujui. Stok belum berubah sampai barang diterima.'
+            : 'Draft pembelian berhasil dibuat.';
+
+        return redirect()->route('purchases.show', $pembelian)->with('success', $message);
     }
 
     public function show(Pembelian $pembelian): View
