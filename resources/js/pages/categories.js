@@ -7,6 +7,9 @@ const categoryTitle = document.querySelector("[data-category-modal-title]");
 const categoryResults = document.querySelector("[data-category-results]");
 const categoryStoreUrl = categoryForm?.action;
 let categorySearchTimer;
+let resolveCategoryConfirmation = null;
+const confirmationModal = document.querySelector('[data-category-confirm-modal]');
+const confirmationMessage = document.querySelector('[data-category-confirm-message]');
 
 const categoryContext = () => {
     const params = new URLSearchParams(window.location.search);
@@ -94,6 +97,28 @@ const ajaxCategoryForm = async (form) => {
     showCategoryNotice(payload.message || "Data kategori berhasil diperbarui.");
 };
 
+const askCategoryConfirmation = (message, confirmLabel = "Ya, lanjutkan", destructive = false) => {
+    if (!confirmationModal) return Promise.resolve(window.confirm(message));
+
+    confirmationMessage.textContent = message;
+    const confirmButton = confirmationModal.querySelector("[data-category-confirm-accept]");
+    confirmButton.textContent = confirmLabel;
+    confirmButton.className = destructive
+        ? "rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15"
+        : "rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/15";
+
+    confirmationModal.showModal();
+    return new Promise((resolve) => { resolveCategoryConfirmation = resolve; });
+};
+
+const closeCategoryConfirmation = (accepted) => {
+    if (!confirmationModal?.open) return;
+    confirmationModal.close();
+    const resolve = resolveCategoryConfirmation;
+    resolveCategoryConfirmation = null;
+    resolve?.(accepted);
+};
+
 const openCategoryModal = (title, action, method, name = "") => {
     if (!categoryModal || !categoryForm) return;
     categoryTitle.textContent = title;
@@ -120,6 +145,16 @@ document.addEventListener("click", async (event) => {
 
     if (event.target.closest("[data-category-close]")) {
         categoryModal?.close();
+        return;
+    }
+
+    if (event.target.closest("[data-category-confirm-cancel]")) {
+        closeCategoryConfirmation(false);
+        return;
+    }
+
+    if (event.target.closest("[data-category-confirm-accept]")) {
+        closeCategoryConfirmation(true);
         return;
     }
 
@@ -163,15 +198,20 @@ document.addEventListener("click", async (event) => {
             showCategoryNotice("Pilih minimal satu kategori terlebih dahulu.", true);
             return;
         }
+        event.preventDefault();
         const action = bulkButton.dataset.bulkSubmit;
         const confirmation = action === "force_delete"
             ? "Hapus permanen kategori yang dipilih? Tindakan ini tidak dapat dibatalkan."
             : action === "restore" ? "Pulihkan kategori yang dipilih?" : "Pindahkan kategori yang dipilih ke sampah?";
-        if (!window.confirm(confirmation)) {
-            event.preventDefault();
-            return;
-        }
+        const accepted = await askCategoryConfirmation(
+            confirmation,
+            action === "force_delete" ? "Hapus permanen" : action === "restore" ? "Pulihkan" : "Pindahkan ke sampah",
+            action !== "restore"
+        );
+        if (!accepted) return;
         form.querySelector("[data-bulk-action]").value = action;
+        try { await ajaxCategoryForm(form); }
+        catch (error) { showCategoryNotice(error.message, true); }
         return;
     }
 
@@ -228,7 +268,15 @@ document.addEventListener("submit", async (event) => {
     const form = event.target.closest("[data-category-ajax-form], [data-category-form]");
     if (!form) return;
     event.preventDefault();
-    if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) return;
+    if (form.dataset.confirm) {
+        const accepted = await askCategoryConfirmation(
+            form.dataset.confirm,
+            form.action.includes("force-delete") ? "Hapus permanen" :
+                form.action.includes("restore") ? "Pulihkan" : "Ya, lanjutkan",
+            !form.action.includes("restore")
+        );
+        if (!accepted) return;
+    }
     try { await ajaxCategoryForm(form); }
     catch (error) { showCategoryNotice(error.message, true); }
 });
