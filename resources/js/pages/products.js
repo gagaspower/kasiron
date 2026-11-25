@@ -90,7 +90,7 @@ const submitAjaxForm = async (form) => {
     data.set("page", current.page);
     setLoading(true);
     try {
-        const response = await fetch(form.action, {
+        const response = await fetch(form.getAttribute("action"), {
             method: "POST",
             body: data,
             headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
