@@ -38,7 +38,9 @@ class Pembelian extends Model
 
     public const STATUS_DISETUJUI = 'disetujui';
 
-    public const STATUS_SELESAI = 'selesai';
+    public const STATUS_SEBAGIAN_DITERIMA = 'sebagian_diterima';
+
+    public const STATUS_DITERIMA = 'diterima';
 
     public const STATUS_DIBATALKAN = 'dibatalkan';
 
