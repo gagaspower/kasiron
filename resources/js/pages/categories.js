@@ -263,7 +263,8 @@ document.addEventListener("click", async (event) => {
 
 document.addEventListener("change", async (event) => {
     if (event.target.matches("[data-category-status-filter]")) {
-        const url = new URL(categoryForm?.action || window.location.pathname, window.location.origin);
+        const indexUrl = categoryResults.querySelector("[data-category-search-form]")?.action || window.location.pathname;
+        const url = new URL(indexUrl, window.location.origin);
         url.searchParams.set("status", event.target.value);
         url.searchParams.delete("search");
         url.searchParams.delete("page");
