@@ -235,6 +235,17 @@ class ProdukController extends Controller
             'satuan_penjualan.*.satuan_id.distinct' => 'Satuan penjualan tidak boleh dipilih lebih dari sekali.',
         ]);
 
+        $barcodes = collect($validated['satuan_penjualan'])
+            ->pluck('barcode')
+            ->filter()
+            ->values();
+
+        if ($barcodes->duplicates()->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'satuan_penjualan' => 'Barcode tidak boleh digunakan lebih dari satu kali dalam produk yang sama.',
+            ]);
+        }
+
         foreach ($validated['satuan_penjualan'] as $index => $row) {
             if (! empty($row['barcode'])) {
                 $barcodeRule = Rule::unique('satuan_produk', 'barcode');
