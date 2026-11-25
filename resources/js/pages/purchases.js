@@ -319,3 +319,9 @@ document.querySelector("[data-purchase-delete-form]")?.addEventListener("submit"
     event.preventDefault();
     if (await askConfirmation("Hapus draft pembelian ini secara permanen? Tindakan ini tidak dapat dibatalkan.")) event.target.submit();
 });
+
+
+document.querySelector("[data-receipt-confirm-form]")?.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (await askConfirmation("Konfirmasi penerimaan barang ini? Setelah dikonfirmasi, stok produk yang mengelola stok akan bertambah dan proses tidak dapat dibatalkan.")) event.target.submit();
+});
