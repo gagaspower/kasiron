@@ -295,3 +295,87 @@ if (productForm) {
     if (baseSelect.value) applyBaseUnit();
     reindex();
 }
+
+\n// Searchable category picker (server-side, limited results).
+const categoryPicker = document.querySelector("[data-category-picker]");
+if (categoryPicker) {
+    const searchInput = categoryPicker.querySelector("[data-category-search]");
+    const valueInput = categoryPicker.querySelector("[data-category-value]");
+    const optionsBox = categoryPicker.querySelector("[data-category-options]");
+    const clearButton = categoryPicker.querySelector("[data-category-clear]");
+    let categoryTimer;
+    let categoryRequest = 0;
+
+    const closeCategoryOptions = () => {
+        optionsBox.classList.add("hidden");
+        searchInput.setAttribute("aria-expanded", "false");
+    };
+
+    const chooseCategory = (item) => {
+        valueInput.value = item.id;
+        searchInput.value = item.text;
+        clearButton.classList.remove("hidden");
+        clearButton.classList.add("flex");
+        closeCategoryOptions();
+    };
+
+    const renderCategoryOptions = (items) => {
+        optionsBox.replaceChildren();
+        if (!items.length) {
+            const empty = document.createElement("p");
+            empty.className = "px-3 py-3 text-sm text-slate-500";
+            empty.textContent = "Kategori tidak ditemukan.";
+            optionsBox.append(empty);
+        } else {
+            items.forEach(item => {
+                const option = document.createElement("button");
+                option.type = "button";
+                option.role = "option";
+                option.className = "block w-full rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-teal-50 hover:text-teal-800";
+                option.textContent = item.text;
+                option.addEventListener("click", () => chooseCategory(item));
+                optionsBox.append(option);
+            });
+        }
+        optionsBox.classList.remove("hidden");
+        searchInput.setAttribute("aria-expanded", "true");
+    };
+
+    const searchCategories = async (query = "") => {
+        const requestId = ++categoryRequest;
+        const url = new URL(categoryPicker.dataset.categoryUrl, window.location.origin);
+        if (query.trim()) url.searchParams.set("q", query.trim());
+        try {
+            const response = await fetch(url, { headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" } });
+            if (!response.ok) throw new Error("Gagal memuat kategori.");
+            const payload = await response.json();
+            if (requestId === categoryRequest) renderCategoryOptions(payload.results || []);
+        } catch (error) {
+            if (requestId === categoryRequest) renderCategoryOptions([]);
+        }
+    };
+
+    searchInput.addEventListener("focus", () => searchCategories(searchInput.value));
+    searchInput.addEventListener("input", () => {
+        valueInput.value = "";
+        clearButton.classList.add("hidden");
+        clearButton.classList.remove("flex");
+        window.clearTimeout(categoryTimer);
+        categoryTimer = window.setTimeout(() => searchCategories(searchInput.value), 250);
+    });
+    clearButton.addEventListener("click", () => {
+        valueInput.value = "";
+        searchInput.value = "";
+        clearButton.classList.add("hidden");
+        clearButton.classList.remove("flex");
+        searchCategories("");
+        searchInput.focus();
+    });
+    document.addEventListener("click", event => {
+        if (!categoryPicker.contains(event.target)) closeCategoryOptions();
+    });
+    if (valueInput.value) {
+        clearButton.classList.remove("hidden");
+        clearButton.classList.add("flex");
+    }
+}
