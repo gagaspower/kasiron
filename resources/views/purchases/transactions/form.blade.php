@@ -29,7 +29,46 @@
                 </div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Nomor faktur supplier</label><input name="nomor_faktur_supplier" value="{{ old('nomor_faktur_supplier', $pembelian->nomor_faktur_supplier) }}" maxlength="100" placeholder="Opsional" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div><label class="mb-2 block text-sm font-medium text-slate-700">Tanggal pembelian <span class="text-rose-500">*</span></label><input type="date" name="tanggal_pembelian" value="{{ old('tanggal_pembelian', $pembelian->tanggal_pembelian?->format('Y-m-d')) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
-                <div><label for="purchase-payment-type" class="mb-2 block text-sm font-medium text-slate-700">Jenis pembayaran <span class="text-rose-500">*</span></label><select id="purchase-payment-type" name="jenis_pembayaran" required data-purchase-payment-type class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"><option value="tunai" @selected(old('jenis_pembayaran', $pembelian->jenis_pembayaran ?? 'tunai') === 'tunai')>Tunai</option><option value="kredit" @selected(old('jenis_pembayaran', $pembelian->jenis_pembayaran) === 'kredit')>Kredit / Tempo</option></select></div>
+                <div class="md:col-span-2">
+                    <span class="mb-2 block text-sm font-medium text-slate-700">Jenis pembayaran <span class="text-rose-500">*</span></span>
+                    @php($jenisPembayaran = old('jenis_pembayaran', $pembelian->jenis_pembayaran ?? 'tunai'))
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <label class="group relative block cursor-pointer">
+                            <input type="radio" name="jenis_pembayaran" value="tunai" data-purchase-payment-type required @checked($jenisPembayaran === 'tunai') class="peer sr-only">
+                            <div class="flex h-full items-start gap-3 rounded-2xl border-2 border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/40 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                                <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition peer-checked:bg-emerald-100 peer-checked:text-emerald-700 group-has-[:checked]:bg-emerald-100 group-has-[:checked]:text-emerald-700">
+                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M7 15h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex items-center justify-between gap-2">
+                                        <span class="font-semibold text-slate-900">Tunai</span>
+                                        <span class="flex size-5 items-center justify-center rounded-full border-2 border-slate-300 text-transparent transition peer-checked:border-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white group-has-[:checked]:border-emerald-600 group-has-[:checked]:bg-emerald-600 group-has-[:checked]:text-white">
+                                            <svg class="size-3" viewBox="0 0 16 16" fill="none"><path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                    </span>
+                                    <span class="mt-1 block text-sm leading-5 text-slate-500">Pembayaran dilakukan secara langsung atau saat transaksi.</span>
+                                </span>
+                            </div>
+                        </label>
+                        <label class="group relative block cursor-pointer">
+                            <input type="radio" name="jenis_pembayaran" value="kredit" data-purchase-payment-type required @checked($jenisPembayaran === 'kredit') class="peer sr-only">
+                            <div class="flex h-full items-start gap-3 rounded-2xl border-2 border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/40 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 peer-focus-visible:ring-4 peer-focus-visible:ring-emerald-500/20">
+                                <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-has-[:checked]:bg-emerald-100 group-has-[:checked]:text-emerald-700">
+                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex items-center justify-between gap-2">
+                                        <span class="font-semibold text-slate-900">Kredit / Tempo</span>
+                                        <span class="flex size-5 items-center justify-center rounded-full border-2 border-slate-300 text-transparent transition group-has-[:checked]:border-emerald-600 group-has-[:checked]:bg-emerald-600 group-has-[:checked]:text-white">
+                                            <svg class="size-3" viewBox="0 0 16 16" fill="none"><path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                    </span>
+                                    <span class="mt-1 block text-sm leading-5 text-slate-500">Pembayaran dilakukan kemudian sesuai tanggal jatuh tempo.</span>
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
                 <div data-purchase-due-date><label for="purchase-due-date" class="mb-2 block text-sm font-medium text-slate-700">Tanggal jatuh tempo <span class="text-rose-500" data-due-date-required>*</span></label><input id="purchase-due-date" type="date" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $pembelian->tanggal_jatuh_tempo?->format('Y-m-d')) }}" data-purchase-due-date-input class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm"></div>
                 <div class="md:col-span-2"><label class="mb-2 block text-sm font-medium text-slate-700">Catatan</label><textarea name="catatan" rows="2" maxlength="5000" class="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm" placeholder="Catatan pembelian (opsional)">{{ old('catatan', $pembelian->catatan) }}</textarea></div>
             </div>
@@ -94,15 +133,16 @@
         window.purchaseInitialRows = @json($initialPurchaseRows);
 
         (() => {
-            const paymentType = document.querySelector('[data-purchase-payment-type]');
+            const paymentTypes = document.querySelectorAll('[data-purchase-payment-type]');
             const dueDateInput = document.querySelector('[data-purchase-due-date-input]');
             const dueDateRequired = document.querySelector('[data-due-date-required]');
             const dueDateWrapper = document.querySelector('[data-purchase-due-date]');
 
-            if (!paymentType || !dueDateInput || !dueDateWrapper) return;
+            if (!paymentTypes.length || !dueDateInput || !dueDateWrapper) return;
 
             const syncDueDateField = () => {
-                const isCredit = paymentType.value === 'kredit';
+                const selectedPaymentType = document.querySelector('[data-purchase-payment-type]:checked');
+                const isCredit = selectedPaymentType?.value === 'kredit';
                 dueDateInput.required = isCredit;
                 dueDateInput.disabled = !isCredit;
                 dueDateWrapper.classList.toggle('opacity-50', !isCredit);
@@ -110,7 +150,7 @@
                 if (!isCredit) dueDateInput.value = '';
             };
 
-            paymentType.addEventListener('change', syncDueDateField);
+            paymentTypes.forEach((paymentType) => paymentType.addEventListener('change', syncDueDateField));
             syncDueDateField();
         })();
     </script>
