@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('products.index');
 
+    Route::get('/supplier/options', [SupplierController::class, 'options'])->name('suppliers.options');
+    Route::get('/produk/options', [PembelianController::class, 'productSearch'])->name('purchases.products.options');
+
     Route::get('/pembelian', [PembelianController::class, 'index'])->name('purchases.index');
     Route::get('/pembelian/tambah', [PembelianController::class, 'create'])->name('purchases.create');
     Route::post('/pembelian', [PembelianController::class, 'store'])->name('purchases.store');
