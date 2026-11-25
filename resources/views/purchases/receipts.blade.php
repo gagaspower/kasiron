@@ -24,7 +24,7 @@
         </table></div>
     </section>
     <section class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-5 py-4"><h2 class="font-semibold text-slate-900">Riwayat penerimaan</h2><p class="mt-1 text-xs text-slate-500">Daftar penerimaan barang, termasuk draft dan penerimaan yang sudah dikonfirmasi.</p></div>
+        <div class="border-b border-slate-100 px-5 py-4"><h2 class="font-semibold text-slate-900">Riwayat penerimaan</h2><p class="mt-1 text-xs text-slate-500">Daftar penerimaan barang yang sudah dicatat, baik draft maupun yang sudah diterima.</p></div>
         <div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left text-sm">
             <thead class="bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3.5">Nomor penerimaan</th><th class="px-3 py-3.5">Tanggal</th><th class="px-3 py-3.5">Nomor pembelian</th><th class="px-3 py-3.5">Supplier</th><th class="px-3 py-3.5">Status</th><th class="px-5 py-3.5 text-right">Aksi</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
