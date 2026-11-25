@@ -406,7 +406,7 @@ class ProdukController extends Controller
             ]],
             ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
                 ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'disabled' => true, 'status' => 'Segera'],
+                ['label' => 'Pembelian', 'href' => route('purchases.index')],
                 ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
             ]],
             ['label' => 'Laporan', 'children' => [
