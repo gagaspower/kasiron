@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function () {
                 ]],
                 ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
                 ['label' => 'Master', 'href' => route('products.index')],
-                ['label' => 'Pembelian', 'disabled' => true, 'status' => 'Segera'],
+                ['label' => 'Pembelian', 'href' => route('purchases.index')],
                 ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
             ]],
                 ['label' => 'Laporan', 'children' => [
@@ -36,6 +36,27 @@ Route::middleware('auth')->group(function () {
             ],
         ]);
     })->name('products.index');
+
+    Route::get('/pembelian', function () {
+        return view('purchases.index', [
+            'navigation' => [
+                ['label' => 'Dashboard', 'href' => route('dashboard'), 'active' => false],
+                ['label' => 'Transaksi', 'children' => [
+                    ['label' => 'Transaksi terbaru', 'href' => '#transaksi'],
+                    ['label' => 'Metode pembayaran', 'href' => '#ringkasan'],
+                ]],
+                ['label' => 'Manajemen Toko', 'active' => true, 'children' => [
+                    ['label' => 'Master', 'href' => route('products.index')],
+                    ['label' => 'Pembelian', 'href' => route('purchases.index')],
+                    ['label' => 'Persediaan', 'disabled' => true, 'status' => 'Segera'],
+                ]],
+                ['label' => 'Laporan', 'children' => [
+                    ['label' => 'Ringkasan penjualan', 'href' => '#dashboard'],
+                    ['label' => 'Pembayaran', 'href' => '#ringkasan'],
+                ]],
+            ],
+        ]);
+    })->name('purchases.index');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('products-master.index');
     Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('products-master.create');
