@@ -53,6 +53,20 @@
             </div>
         </form>
     </dialog>
+
+    <dialog data-category-confirm-modal class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/40">
+        <div class="p-6">
+            <div class="mb-4 flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none"><path d="M12 8v4m0 4h.01M10.3 3.9 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">Konfirmasi tindakan</h2>
+            <p data-category-confirm-message class="mt-2 text-sm leading-6 text-slate-500"></p>
+        </div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 bg-slate-50/70 px-6 py-4">
+            <button type="button" data-category-confirm-cancel class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Batal</button>
+            <button type="button" data-category-confirm-accept class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">Ya, lanjutkan</button>
+        </div>
+    </dialog>
 @endsection
 
 @section('script')
