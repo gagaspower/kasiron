@@ -43,8 +43,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pembelian', [PembelianController::class, 'index'])->name('purchases.index');
     Route::get('/pembelian/transaksi', [PembelianController::class, 'transactions'])->name('purchases.transactions.index');
-    Route::get('/pembelian/penerimaan', fn () => view('purchases.receipts.index', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.receipts.index');
-    Route::get('/pembelian/pembayaran', fn () => view('purchases.payments.index', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.payments.index');
+    Route::get('/pembelian/penerimaan', fn () => view('purchases.receipts', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.receipts.index');
+    Route::get('/pembelian/pembayaran', fn () => view('purchases.payments', ['navigation' => app(PembelianController::class)->navigationForView()]))->name('purchases.payments.index');
     Route::get('/pembelian/tambah', [PembelianController::class, 'create'])->name('purchases.create');
     Route::post('/pembelian', [PembelianController::class, 'store'])->name('purchases.store');
     Route::get('/pembelian/{pembelian}/edit', [PembelianController::class, 'edit'])->name('purchases.edit');
