@@ -98,7 +98,7 @@ const ajaxUnitForm = async (form) => {
 };
 
 const askUnitConfirmation = (message, label = "Ya, lanjutkan", destructive = false) => {
-    if (!unitConfirmModal) return Promise.resolve(window.confirm(message));
+    if (!unitConfirmModal) return Promise.resolve(false);
     unitConfirmMessage.textContent = message;
     const button = unitConfirmModal.querySelector("[data-unit-confirm-accept]");
     button.textContent = label;
