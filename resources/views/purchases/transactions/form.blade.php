@@ -5,7 +5,7 @@
 @section('product-content')
     <div class="mb-7">
         <a href="{{ route('purchases.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-emerald-700">← Daftar Pembelian</a>
-        <div class="mt-4"><p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/80">Transaksi pembelian</p><h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ $formTitle }}</h1><p class="mt-2 text-sm text-slate-500">Draft pembelian belum memengaruhi stok produk.</p></div>
+        <div class="mt-4"><p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/80">Transaksi pembelian</p><h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ $formTitle }}</h1><p class="mt-2 text-sm text-slate-500">Anda dapat menyimpan sebagai draft untuk diproses nanti, atau langsung menyetujui pembelian.</p></div>
     </div>
 
     @if($errors->any())
@@ -68,7 +68,7 @@
                 </div>
             </div>
         </section>
-        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><a href="{{ route('purchases.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</a><button type="submit" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">Simpan sebagai Draft</button></div>
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><a href="{{ route('purchases.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</a>@if($formMethod === 'POST')<button type="submit" name="proses" value="draft" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Simpan Draft</button><button type="submit" name="proses" value="setujui" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">Simpan &amp; Setujui</button>@else<button type="submit" class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">Simpan Perubahan Draft</button>@endif</div>
     </form>
 @endsection
 
