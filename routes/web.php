@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,17 @@ Route::middleware('auth')->group(function () {
             ],
         ]);
     })->name('products.index');
+
+    Route::get('/produk', [ProdukController::class, 'index'])->name('products-master.index');
+    Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('products-master.create');
+    Route::post('/produk', [ProdukController::class, 'store'])->name('products-master.store');
+    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('products-master.edit');
+    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('products-master.update');
+    Route::patch('/produk/{produk}/status', [ProdukController::class, 'toggleStatus'])->name('products-master.toggle-status');
+    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('products-master.destroy');
+    Route::patch('/produk/{id}/restore', [ProdukController::class, 'restore'])->name('products-master.restore');
+    Route::delete('/produk/{id}/permanen', [ProdukController::class, 'forceDelete'])->name('products-master.force-delete');
+    Route::post('/produk/bulk-action', [ProdukController::class, 'bulkAction'])->name('products-master.bulk-action');
 
     Route::get('/kategori', [KategoriController::class, 'index'])->name('categories.index');
     Route::post('/kategori', [KategoriController::class, 'store'])->name('categories.store');
