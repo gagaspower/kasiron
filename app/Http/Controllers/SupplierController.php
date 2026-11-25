@@ -40,6 +40,25 @@ class SupplierController extends Controller
         return view('products.suppliers.index', $data);
     }
 
+    public function options(Request $request)
+    {
+        $search = trim($request->string('q')->value());
+
+        $suppliers = Supplier::query()
+            ->where('aktif', true)
+            ->when($search !== '', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
+            ->orderBy('nama')
+            ->limit(20)
+            ->get(['id', 'nama']);
+
+        return response()->json([
+            'results' => $suppliers->map(fn (Supplier $supplier) => [
+                'id' => $supplier->id,
+                'text' => $supplier->nama,
+            ])->values(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
