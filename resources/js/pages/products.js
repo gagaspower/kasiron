@@ -296,7 +296,8 @@ if (productForm) {
     reindex();
 }
 
-\n// Searchable category picker (server-side, limited results).
+
+// Searchable category picker (server-side, limited results).
 const categoryPicker = document.querySelector("[data-category-picker]");
 if (categoryPicker) {
     const searchInput = categoryPicker.querySelector("[data-category-search]");
