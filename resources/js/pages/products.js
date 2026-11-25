@@ -292,6 +292,6 @@ if (productForm) {
     baseSelect.addEventListener("change", applyBaseUnit);
     productForm.querySelector("[data-product-add-unit]")?.addEventListener("click", addRow);
 
-    if (rows().length === 0 && baseSelect.value) applyBaseUnit();
+    if (baseSelect.value) applyBaseUnit();
     reindex();
 }
