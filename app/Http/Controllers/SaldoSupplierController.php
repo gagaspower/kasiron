@@ -44,6 +44,12 @@ class SaldoSupplierController extends Controller
             ->filter(fn ($invoice) => round((float) $invoice->total - (float) $invoice->sudah_dibayar, 2) > 0)
             ->groupBy('supplier_id');
 
+        $settlements = PenyelesaianKelebihanSupplier::query()
+            ->with('kelebihan.supplier')
+            ->latest('tanggal')
+            ->paginate(10, ['*'], 'penyelesaian_page')
+            ->withQueryString();
+
         $mutations = MutasiSaldoSupplier::query()
             ->when($request->filled('supplier_id'), fn ($q) => $q->where('supplier_id', $request->supplier_id))
             ->with('supplier')
@@ -56,6 +62,7 @@ class SaldoSupplierController extends Controller
             'balances' => $balances,
             'mutations' => $mutations,
             'openInvoices' => $openInvoices,
+            'settlements' => $settlements,
             'suppliers' => Supplier::query()->orderBy('nama')->get(),
             'navigation' => app(PembelianController::class)->navigationForView(),
         ]);
