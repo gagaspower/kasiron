@@ -101,6 +101,7 @@
             const dueDateInput = document.querySelector('[data-purchase-due-date-input]');
             const dueDateRequired = document.querySelector('[data-due-date-required]');
             const dueDateWrapper = document.querySelector('[data-purchase-due-date]');
+            const today = @json(now()->toDateString());
 
             if (!paymentTypes.length || !dueDateInput || !dueDateWrapper) return;
 
@@ -111,6 +112,7 @@
                 dueDateInput.disabled = !isCredit;
                 dueDateWrapper.classList.toggle('opacity-50', !isCredit);
                 if (dueDateRequired) dueDateRequired.classList.toggle('hidden', !isCredit);
+                if (isCredit && !dueDateInput.value) dueDateInput.value = today;
                 if (!isCredit) dueDateInput.value = '';
             };
 
