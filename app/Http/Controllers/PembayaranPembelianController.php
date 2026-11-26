@@ -27,9 +27,19 @@ class PembayaranPembelianController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('purchases.payments.index', [
+        $data = [
             'payments' => $payments,
-            'suppliers' => Supplier::query()->orderBy('nama')->get(),
+            'suppliers' => Supplier::query()->where('aktif', true)->orderBy('nama')->get(),
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'html' => view('purchases.payments.results', $data)->render(),
+                'url' => $request->fullUrl(),
+            ]);
+        }
+
+        return view('purchases.payments.index', $data + [
             'navigation' => app(PembelianController::class)->navigationForView(),
         ]);
     }
