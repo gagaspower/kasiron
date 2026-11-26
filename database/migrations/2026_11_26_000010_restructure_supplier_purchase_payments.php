@@ -100,6 +100,13 @@ return new class extends Migration
 
     public function down(): void
     {
+        DB::table('pembayaran_pembelian_detail')->orderBy('id')->get()->each(function ($detail) {
+            DB::table('pembayaran_pembelian')->where('id', $detail->pembayaran_pembelian_id)->update([
+                'pembelian_id' => $detail->pembelian_id,
+                'jumlah_bayar' => $detail->jumlah_bayar,
+            ]);
+        });
+
         Schema::dropIfExists('mutasi_saldo_supplier');
         Schema::dropIfExists('penyelesaian_kelebihan_supplier');
         Schema::dropIfExists('kelebihan_pembayaran_supplier');
@@ -108,13 +115,6 @@ return new class extends Migration
         Schema::table('pembayaran_pembelian', function (Blueprint $table) {
             $table->foreignUlid('pembelian_id')->nullable()->after('nomor_pembayaran')->constrained('pembelian')->restrictOnDelete();
             $table->decimal('jumlah_bayar', 20, 2)->nullable();
-        });
-
-        DB::table('pembayaran_pembelian_detail')->orderBy('id')->get()->each(function ($detail) {
-            DB::table('pembayaran_pembelian')->where('id', $detail->pembayaran_pembelian_id)->update([
-                'pembelian_id' => $detail->pembelian_id,
-                'jumlah_bayar' => $detail->jumlah_bayar,
-            ]);
         });
 
         Schema::table('pembayaran_pembelian', function (Blueprint $table) {
