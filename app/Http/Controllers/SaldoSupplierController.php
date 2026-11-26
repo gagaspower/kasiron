@@ -80,6 +80,7 @@ class SaldoSupplierController extends Controller
 
         DB::transaction(function () use ($data, $request, $kelebihan) {
             $locked = KelebihanPembayaranSupplier::query()->whereKey($kelebihan->id)->lockForUpdate()->firstOrFail();
+            Supplier::query()->whereKey($locked->supplier_id)->lockForUpdate()->firstOrFail();
             $settled = (float) $locked->penyelesaian()->sum('jumlah');
             $remaining = round((float) $locked->jumlah_kelebihan - $settled, 2);
             $amount = round((float) $data['jumlah'], 2);
