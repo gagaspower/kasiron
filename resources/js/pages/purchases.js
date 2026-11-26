@@ -858,3 +858,21 @@ if (paymentListResults) {
         catch (error) { showPaymentListError(error.message || "Gagal memuat daftar pembayaran."); setPaymentListLoading(false); }
     });
 }
+
+
+// Payment date range: end date follows start date until the user edits it manually.
+let paymentEndDateManuallyChanged = false;
+
+document.addEventListener("change", event => {
+    if (event.target.matches("[data-payment-date-from]")) {
+        const dateFrom = event.target;
+        const dateTo = document.querySelector("[data-payment-date-to]");
+        if (dateTo && !paymentEndDateManuallyChanged) {
+            dateTo.value = dateFrom.value;
+        }
+    }
+
+    if (event.target.matches("[data-payment-date-to]")) {
+        paymentEndDateManuallyChanged = true;
+    }
+});
