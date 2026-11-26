@@ -160,4 +160,14 @@ class PembayaranPembelianController extends Controller
 
         return redirect()->route('purchases.payments.index')->with('success', 'Pembayaran pembelian berhasil dicatat.');
     }
+
+    public function show(PembayaranPembelian $pembayaran): View
+    {
+        $pembayaran->load(['supplier', 'detail.pembelian', 'kelebihan.penyelesaian']);
+
+        return view('purchases.payments.show', [
+            'payment' => $pembayaran,
+            'navigation' => app(PembelianController::class)->navigationForView(),
+        ]);
+    }
 }
