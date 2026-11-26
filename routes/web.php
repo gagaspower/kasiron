@@ -103,6 +103,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembayaran/tambah', [PembayaranPembelianController::class, 'create'])->name('payments.create');
         Route::post('/pembayaran', [PembayaranPembelianController::class, 'store'])->name('payments.store');
         Route::get('/pembayaran/{pembayaran}', [PembayaranPembelianController::class, 'show'])->name('payments.show');
+        Route::get('/pembayaran/{pembayaran}/revisi', [PembayaranPembelianController::class, 'edit'])->name('payments.edit');
+        Route::put('/pembayaran/{pembayaran}', [PembayaranPembelianController::class, 'update'])->name('payments.update');
+        Route::patch('/pembayaran/{pembayaran}/batalkan', [PembayaranPembelianController::class, 'cancel'])->name('payments.cancel');
 
         Route::get('/saldo-kelebihan', [SaldoSupplierController::class, 'index'])->name('balances.index');
         Route::post('/saldo-kelebihan/{kelebihan}/selesaikan', [SaldoSupplierController::class, 'settle'])->name('balances.settle');
