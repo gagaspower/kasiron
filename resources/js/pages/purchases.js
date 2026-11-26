@@ -685,6 +685,7 @@ if (paymentInvoiceFilter && paymentInvoiceContent) {
             if (requestId !== invoiceRequest) return;
             paymentInvoiceContent.innerHTML = updated.innerHTML;
             if (pushHistory) window.history.pushState({}, "", response.url || url);
+            bindMoneyInputs(paymentInvoiceContent);
             bindPaymentTotalInput(paymentInvoiceContent);
         } catch (error) {
             let notice = paymentInvoiceContent.querySelector("[data-payment-load-error]");
