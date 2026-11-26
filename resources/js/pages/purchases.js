@@ -762,3 +762,97 @@ function bindPaymentTotalInput(root = document) {
     display.value = format(raw.value);
 }
 bindPaymentTotalInput();
+
+
+// Supplier payment listing: AJAX filters, reset, pagination, and loading state.
+const paymentListResults = document.querySelector("[data-payment-list-results]");
+if (paymentListResults) {
+    let paymentListRequest = 0;
+    let paymentListOverlay = null;
+
+    const setPaymentListLoading = loading => {
+        if (loading) {
+            if (paymentListOverlay) return;
+            paymentListResults.classList.add("relative", "min-h-[160px]");
+            paymentListResults.setAttribute("aria-busy", "true");
+            paymentListOverlay = document.createElement("div");
+            paymentListOverlay.className = "absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-[1px]";
+            paymentListOverlay.innerHTML = '<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm"><span class="size-5 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-600"></span><span>Memuat data...</span></div>';
+            paymentListResults.append(paymentListOverlay);
+        } else {
+            paymentListOverlay?.remove();
+            paymentListOverlay = null;
+            paymentListResults.removeAttribute("aria-busy");
+            paymentListResults.classList.remove("relative", "min-h-[160px]");
+        }
+    };
+
+    const showPaymentListError = message => {
+        let notice = document.querySelector("[data-payment-list-error]");
+        if (!notice) {
+            notice = document.createElement("div");
+            notice.dataset.paymentListError = "";
+            notice.className = "mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700";
+            paymentListResults.before(notice);
+        }
+        notice.textContent = message;
+    };
+
+    const refreshPaymentList = async (url, pushHistory = true) => {
+        const requestId = ++paymentListRequest;
+        const target = new URL(url, window.location.origin);
+        setPaymentListLoading(true);
+        try {
+            const response = await fetch(target, {
+                headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+                credentials: "same-origin"
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || "Tidak dapat memuat daftar pembayaran.");
+            if (requestId !== paymentListRequest) return;
+            const parsed = new DOMParser().parseFromString(payload.html, "text/html");
+            const updated = parsed.querySelector("[data-payment-list-results]");
+            if (!updated) throw new Error("Struktur daftar pembayaran tidak ditemukan.");
+            paymentListResults.innerHTML = updated.innerHTML;
+            bindSupplierPicker(paymentListResults);
+            if (pushHistory) window.history.pushState({}, "", payload.url || target);
+            document.querySelector("[data-payment-list-error]")?.remove();
+        } finally {
+            if (requestId === paymentListRequest) setPaymentListLoading(false);
+        }
+    };
+
+    const paymentListFilterUrl = form => {
+        const url = new URL(form.action, window.location.origin);
+        for (const [key, value] of new FormData(form).entries()) {
+            if (String(value).trim()) url.searchParams.set(key, value);
+            else url.searchParams.delete(key);
+        }
+        url.searchParams.delete("page");
+        return url;
+    };
+
+    document.addEventListener("submit", async event => {
+        const filter = event.target.closest("[data-payment-list-filter]");
+        if (!filter) return;
+        event.preventDefault();
+        try { await refreshPaymentList(paymentListFilterUrl(filter)); }
+        catch (error) { showPaymentListError(error.message || "Gagal memuat daftar pembayaran."); setPaymentListLoading(false); }
+    });
+
+    document.addEventListener("click", async event => {
+        const reset = event.target.closest("[data-payment-list-reset]");
+        const page = event.target.closest("[data-payment-list-results] nav a, [data-payment-list-results] a[rel='next'], [data-payment-list-results] a[rel='prev']");
+        const link = reset || page;
+        if (!link?.href) return;
+        event.preventDefault();
+        try { await refreshPaymentList(link.href); }
+        catch (error) { showPaymentListError(error.message || "Gagal memuat daftar pembayaran."); setPaymentListLoading(false); }
+    });
+
+    window.addEventListener("popstate", async () => {
+        if (window.location.pathname !== new URL("{{ route('purchases.payments.index') }}", window.location.origin).pathname) return;
+        try { await refreshPaymentList(window.location.href, false); }
+        catch (error) { showPaymentListError(error.message || "Gagal memuat daftar pembayaran."); setPaymentListLoading(false); }
+    });
+}
