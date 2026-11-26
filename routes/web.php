@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/saldo-kelebihan', [SaldoSupplierController::class, 'index'])->name('balances.index');
         Route::post('/saldo-kelebihan/{kelebihan}/selesaikan', [SaldoSupplierController::class, 'settle'])->name('balances.settle');
+        Route::post('/saldo-kelebihan/supplier/{supplier}/gunakan', [SaldoSupplierController::class, 'useDeposit'])->name('balances.use');
 
         Route::get('/tambah', [PembelianController::class, 'create'])->name('create');
         Route::post('/', [PembelianController::class, 'store'])->name('store');
