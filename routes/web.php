@@ -3,20 +3,20 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\SatuanController;
-use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PembayaranPembelianController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenerimaanPembelianController;
-use App\Http\Controllers\PembayaranPembelianController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SaldoSupplierController;
+use App\Http\Controllers\SatuanController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 /*
-|--------------------------------------------------------------------------
-| Authentication
-|--------------------------------------------------------------------------
-*/
+ * |--------------------------------------------------------------------------
+ * | Authentication
+ * |--------------------------------------------------------------------------
+ */
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [LoginController::class, 'create'])->name('login');
@@ -27,18 +27,18 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     /*
-    |--------------------------------------------------------------------------
-    | Dashboard
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Dashboard
+     * |--------------------------------------------------------------------------
+     */
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     /*
-    |--------------------------------------------------------------------------
-    | Main navigation pages
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Main navigation pages
+     * |--------------------------------------------------------------------------
+     */
 
     Route::get('/manajemen-produk', function () {
         return view('products.index', [
@@ -83,10 +83,10 @@ Route::middleware('auth')->group(function () {
     })->name('inventory.index');
 
     /*
-    |--------------------------------------------------------------------------
-    | Purchase management
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Purchase management
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('pembelian')->name('purchases.')->group(function () {
         Route::get('/', [PembelianController::class, 'index'])->name('index');
@@ -118,10 +118,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Goods receipt actions
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Goods receipt actions
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('penerimaan')->name('purchases.receipts.')->group(function () {
         Route::get('/{penerimaan}', [PenerimaanPembelianController::class, 'show'])->name('show');
@@ -132,20 +132,20 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Supplier and product lookup options
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Supplier and product lookup options
+     * |--------------------------------------------------------------------------
+     */
 
     Route::get('/supplier/options', [SupplierController::class, 'options'])->name('suppliers.options');
     Route::get('/produk/options', [PembelianController::class, 'productSearch'])->name('purchases.products.options');
     Route::get('/kategori/options', [ProdukController::class, 'categoryOptions'])->name('categories.options');
 
     /*
-    |--------------------------------------------------------------------------
-    | Product master
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Product master
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('produk')->name('products-master.')->group(function () {
         Route::get('/', [ProdukController::class, 'index'])->name('index');
@@ -161,10 +161,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Category master
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Category master
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('kategori')->name('categories.')->group(function () {
         Route::get('/', [KategoriController::class, 'index'])->name('index');
@@ -178,10 +178,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Unit master
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Unit master
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('satuan')->name('units.')->group(function () {
         Route::get('/', [SatuanController::class, 'index'])->name('index');
@@ -195,10 +195,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Supplier master
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Supplier master
+     * |--------------------------------------------------------------------------
+     */
 
     Route::prefix('supplier')->name('suppliers.')->group(function () {
         Route::get('/', [SupplierController::class, 'index'])->name('index');
@@ -212,10 +212,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Logout
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Logout
+     * |--------------------------------------------------------------------------
+     */
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
