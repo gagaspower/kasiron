@@ -543,3 +543,110 @@ if (receiptResults) {
         catch (error) { showReceiptNotice(error.message); setReceiptLoading(false); }
     });
 }
+
+
+// Supplier balances: AJAX filter, pagination, settlement, and deposit usage.
+const balanceResults = document.querySelector("[data-balance-results]");
+if (balanceResults) {
+    let balanceRequest = 0;
+    let balanceOverlay = null;
+
+    const setBalanceLoading = loading => {
+        if (loading) {
+            if (balanceOverlay) return;
+            balanceResults.classList.add("relative", "min-h-[180px]");
+            balanceResults.setAttribute("aria-busy", "true");
+            balanceOverlay = document.createElement("div");
+            balanceOverlay.className = "absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-[1px]";
+            balanceOverlay.innerHTML = '<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm"><span class="size-5 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-600"></span><span>Memuat data...</span></div>';
+            balanceResults.append(balanceOverlay);
+        } else {
+            balanceOverlay?.remove();
+            balanceOverlay = null;
+            balanceResults.removeAttribute("aria-busy");
+        }
+    };
+
+    const showBalanceError = message => {
+        let notice = balanceResults.querySelector("[data-balance-error]");
+        if (!notice) {
+            notice = document.createElement("div");
+            notice.dataset.balanceError = "";
+            notice.className = "mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700";
+            balanceResults.prepend(notice);
+        }
+        notice.textContent = message;
+    };
+
+    const refreshBalances = async (url, options = {}) => {
+        const requestId = ++balanceRequest;
+        setBalanceLoading(true);
+        try {
+            const response = await fetch(url, {
+                method: options.method || "GET",
+                body: options.body || undefined,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "text/html",
+                    ...(options.method === "POST" ? { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "" } : {})
+                },
+                credentials: "same-origin"
+            });
+            const html = await response.text();
+            if (!response.ok) {
+                const parsedError = new DOMParser().parseFromString(html, "text/html");
+                const message = parsedError.querySelector("[data-balance-validation]")?.textContent?.trim();
+                throw new Error(message || "Permintaan tidak berhasil diproses.");
+            }
+            const parsed = new DOMParser().parseFromString(html, "text/html");
+            const updated = parsed.querySelector("[data-balance-results]");
+            if (!updated) throw new Error("Data saldo tidak ditemukan pada respons server.");
+            if (requestId !== balanceRequest) return;
+            balanceResults.innerHTML = updated.innerHTML;
+            if (options.pushHistory) window.history.pushState({}, "", response.url || url);
+            document.querySelector("[data-balance-error]")?.remove();
+        } finally {
+            if (requestId === balanceRequest) setBalanceLoading(false);
+        }
+    };
+
+    document.addEventListener("submit", async event => {
+        const filter = event.target.closest("[data-balance-filter]");
+        const action = event.target.closest("[data-balance-ajax]");
+        if (!filter && !action) return;
+        event.preventDefault();
+        const form = filter || action;
+        const submit = form.querySelector('button[type="submit"], button:not([type])');
+        if (submit) submit.disabled = true;
+        try {
+            const url = form.action || window.location.href;
+            const options = filter
+                ? { pushHistory: true }
+                : { method: "POST", body: new FormData(form), pushHistory: false };
+            const target = filter ? new URL(url, window.location.origin) : url;
+            if (filter) {
+                const query = new URLSearchParams(new FormData(form));
+                target.search = query.toString();
+            }
+            await refreshBalances(target, options);
+        } catch (error) {
+            showBalanceError(error.message || "Terjadi kesalahan saat memproses data.");
+            setBalanceLoading(false);
+        } finally {
+            if (submit) submit.disabled = false;
+        }
+    });
+
+    document.addEventListener("click", async event => {
+        const link = event.target.closest("[data-balance-results] nav a, [data-balance-results] a[rel='next'], [data-balance-results] a[rel='prev']");
+        if (!link?.href) return;
+        event.preventDefault();
+        try { await refreshBalances(link.href, { pushHistory: true }); }
+        catch (error) { showBalanceError(error.message || "Gagal memuat halaman."); setBalanceLoading(false); }
+    });
+
+    window.addEventListener("popstate", async () => {
+        try { await refreshBalances(window.location.href); }
+        catch (error) { showBalanceError(error.message || "Gagal memuat halaman."); setBalanceLoading(false); }
+    });
+}
