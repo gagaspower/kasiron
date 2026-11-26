@@ -71,7 +71,28 @@
             <div class="border-b border-slate-100 px-5 py-4"><h2 class="font-semibold text-slate-900">Saldo titipan supplier</h2><p class="mt-1 text-xs text-slate-500">Saldo dihitung dari mutasi masuk dikurangi pemakaian.</p></div>
             <div class="divide-y divide-slate-100">
                 @forelse($balances as $balance)
-                    <div class="flex items-center justify-between gap-3 px-5 py-4"><span class="text-sm font-medium text-slate-700">{{ $balance->supplier?->nama }}</span><span class="font-semibold tabular-nums text-emerald-700">Rp {{ number_format((float) $balance->saldo, 0, ',', '.') }}</span></div>
+                    <div class="px-5 py-4">
+                        <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-slate-700">{{ $balance->supplier?->nama }}</span><span class="font-semibold tabular-nums text-emerald-700">Rp {{ number_format((float) $balance->saldo, 0, ',', '.') }}</span></div>
+                        <details class="mt-3">
+                            <summary class="cursor-pointer text-xs font-semibold text-emerald-700">Gunakan titipan untuk membayar nota</summary>
+                            <form method="POST" action="{{ route('purchases.balances.use', $balance->supplier_id) }}" class="mt-3 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                @csrf
+                                <div><label class="mb-1 block text-xs font-medium text-slate-600">Tanggal penggunaan</label><input type="date" name="tanggal" value="{{ now()->toDateString() }}" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                                @forelse(($openInvoices[$balance->supplier_id] ?? collect()) as $invoice)
+                                    @php($paid = (float) $invoice->sudah_dibayar)
+                                    @php($remaining = round((float) $invoice->total - $paid, 2))
+                                    <div class="grid grid-cols-[1fr_120px] items-center gap-2 border-t border-slate-200 pt-2">
+                                        <div><p class="text-xs font-semibold text-slate-700">{{ $invoice->nomor_pembelian }}</p><p class="text-[11px] text-slate-500">Sisa Rp {{ number_format($remaining, 0, ',', '.') }}</p></div>
+                                        <input type="number" name="alokasi[{{ $invoice->id }}]" min="0" max="{{ $remaining }}" step="0.01" placeholder="Nominal" class="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-right text-xs">
+                                    </div>
+                                @empty
+                                    <p class="text-xs text-slate-500">Supplier ini tidak memiliki nota yang masih terbuka.</p>
+                                @endforelse
+                                <textarea name="catatan" rows="2" placeholder="Catatan (opsional)" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"></textarea>
+                                <button class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Gunakan saldo titipan</button>
+                            </form>
+                        </details>
+                    </div>
                 @empty
                     <p class="px-5 py-8 text-center text-sm text-slate-500">Belum ada saldo titipan supplier.</p>
                 @endforelse
