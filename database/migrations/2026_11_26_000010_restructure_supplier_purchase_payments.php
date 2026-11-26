@@ -1,12 +1,11 @@
 <?php
 
-use Illuminate\\Database\\Migrations\\Migration;
-use Illuminate\\Database\\Schema\\Blueprint;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // Tambahkan kolom hanya jika belum ada agar migration bisa dilanjutkan
@@ -14,8 +13,11 @@ return new class extends Migration
         if (!Schema::hasColumn('pembayaran_pembelian', 'supplier_id')) {
             Schema::table('pembayaran_pembelian', function (Blueprint $table) {
                 $table->ulid('supplier_id')->nullable()->after('nomor_pembayaran');
-                $table->foreign('supplier_id', 'pembayaran_pembelian_supplier_fk')
-                    ->references('id')->on('supplier')->restrictOnDelete();
+                $table
+                    ->foreign('supplier_id', 'pembayaran_pembelian_supplier_fk')
+                    ->references('id')
+                    ->on('supplier')
+                    ->restrictOnDelete();
             });
         }
 
@@ -41,11 +43,17 @@ return new class extends Migration
             Schema::create('pembayaran_pembelian_detail', function (Blueprint $table) {
                 $table->ulid('id')->primary();
                 $table->foreignUlid('pembayaran_pembelian_id');
-                $table->foreign('pembayaran_pembelian_id', 'pp_detail_pembayaran_fk')
-                    ->references('id')->on('pembayaran_pembelian')->cascadeOnDelete();
+                $table
+                    ->foreign('pembayaran_pembelian_id', 'pp_detail_pembayaran_fk')
+                    ->references('id')
+                    ->on('pembayaran_pembelian')
+                    ->cascadeOnDelete();
                 $table->foreignUlid('pembelian_id');
-                $table->foreign('pembelian_id', 'pp_detail_pembelian_fk')
-                    ->references('id')->on('pembelian')->restrictOnDelete();
+                $table
+                    ->foreign('pembelian_id', 'pp_detail_pembelian_fk')
+                    ->references('id')
+                    ->on('pembelian')
+                    ->restrictOnDelete();
                 $table->decimal('jumlah_bayar', 20, 2);
                 $table->timestamp('dibuat_pada')->nullable();
                 $table->timestamp('diperbarui_pada')->nullable();
@@ -63,12 +71,12 @@ return new class extends Migration
             DB::table('pembayaran_pembelian')->orderBy('id')->chunk(100, function ($payments) {
                 foreach ($payments as $payment) {
                     DB::table('pembayaran_pembelian_detail')->insertOrIgnore([
-                        'id' => (string) Illuminate\\Support\\Str::ulid(),
+                        'id'                      => (string) Illuminate\Support\Str::ulid(),
                         'pembayaran_pembelian_id' => $payment->id,
-                        'pembelian_id' => $payment->pembelian_id,
-                        'jumlah_bayar' => $payment->jumlah_bayar,
-                        'dibuat_pada' => $payment->dibuat_pada,
-                        'diperbarui_pada' => $payment->diperbarui_pada,
+                        'pembelian_id'            => $payment->pembelian_id,
+                        'jumlah_bayar'            => $payment->jumlah_bayar,
+                        'dibuat_pada'             => $payment->dibuat_pada,
+                        'diperbarui_pada'         => $payment->diperbarui_pada,
                     ]);
                 }
             });
@@ -92,17 +100,26 @@ return new class extends Migration
                 $table->ulid('id')->primary();
                 $table->string('nomor_kelebihan', 40)->unique();
                 $table->foreignUlid('pembayaran_pembelian_id')->unique();
-                $table->foreign('pembayaran_pembelian_id', 'kelebihan_pembayaran_fk')
-                    ->references('id')->on('pembayaran_pembelian')->restrictOnDelete();
+                $table
+                    ->foreign('pembayaran_pembelian_id', 'kelebihan_pembayaran_fk')
+                    ->references('id')
+                    ->on('pembayaran_pembelian')
+                    ->restrictOnDelete();
                 $table->foreignUlid('supplier_id');
-                $table->foreign('supplier_id', 'kelebihan_supplier_fk')
-                    ->references('id')->on('supplier')->restrictOnDelete();
+                $table
+                    ->foreign('supplier_id', 'kelebihan_supplier_fk')
+                    ->references('id')
+                    ->on('supplier')
+                    ->restrictOnDelete();
                 $table->decimal('jumlah_kelebihan', 20, 2);
                 $table->date('tanggal');
                 $table->text('catatan')->nullable();
                 $table->foreignUlid('dibuat_oleh');
-                $table->foreign('dibuat_oleh', 'kelebihan_pembuat_fk')
-                    ->references('id')->on('users')->restrictOnDelete();
+                $table
+                    ->foreign('dibuat_oleh', 'kelebihan_pembuat_fk')
+                    ->references('id')
+                    ->on('users')
+                    ->restrictOnDelete();
                 $table->timestamp('dibuat_pada')->nullable();
                 $table->timestamp('diperbarui_pada')->nullable();
                 $table->index(['supplier_id', 'tanggal']);
@@ -113,16 +130,22 @@ return new class extends Migration
             Schema::create('penyelesaian_kelebihan_supplier', function (Blueprint $table) {
                 $table->ulid('id')->primary();
                 $table->foreignUlid('kelebihan_pembayaran_supplier_id');
-                $table->foreign('kelebihan_pembayaran_supplier_id', 'penyelesaian_kelebihan_fk')
-                    ->references('id')->on('kelebihan_pembayaran_supplier')->restrictOnDelete();
+                $table
+                    ->foreign('kelebihan_pembayaran_supplier_id', 'penyelesaian_kelebihan_fk')
+                    ->references('id')
+                    ->on('kelebihan_pembayaran_supplier')
+                    ->restrictOnDelete();
                 $table->string('jenis', 20);
                 $table->decimal('jumlah', 20, 2);
                 $table->date('tanggal');
                 $table->string('referensi', 150)->nullable();
                 $table->text('catatan')->nullable();
                 $table->foreignUlid('dibuat_oleh');
-                $table->foreign('dibuat_oleh', 'penyelesaian_pembuat_fk')
-                    ->references('id')->on('users')->restrictOnDelete();
+                $table
+                    ->foreign('dibuat_oleh', 'penyelesaian_pembuat_fk')
+                    ->references('id')
+                    ->on('users')
+                    ->restrictOnDelete();
                 $table->timestamp('dibuat_pada')->nullable();
                 $table->timestamp('diperbarui_pada')->nullable();
                 $table->index(['kelebihan_pembayaran_supplier_id', 'tanggal']);
@@ -133,11 +156,17 @@ return new class extends Migration
             Schema::create('mutasi_saldo_supplier', function (Blueprint $table) {
                 $table->ulid('id')->primary();
                 $table->foreignUlid('supplier_id');
-                $table->foreign('supplier_id', 'mutasi_supplier_fk')
-                    ->references('id')->on('supplier')->restrictOnDelete();
+                $table
+                    ->foreign('supplier_id', 'mutasi_supplier_fk')
+                    ->references('id')
+                    ->on('supplier')
+                    ->restrictOnDelete();
                 $table->foreignUlid('penyelesaian_kelebihan_supplier_id')->nullable();
-                $table->foreign('penyelesaian_kelebihan_supplier_id', 'mutasi_penyelesaian_fk')
-                    ->references('id')->on('penyelesaian_kelebihan_supplier')->restrictOnDelete();
+                $table
+                    ->foreign('penyelesaian_kelebihan_supplier_id', 'mutasi_penyelesaian_fk')
+                    ->references('id')
+                    ->on('penyelesaian_kelebihan_supplier')
+                    ->restrictOnDelete();
                 $table->string('jenis', 20);
                 $table->decimal('jumlah', 20, 2);
                 $table->date('tanggal');
@@ -145,8 +174,11 @@ return new class extends Migration
                 $table->string('referensi_id', 40)->nullable();
                 $table->text('catatan')->nullable();
                 $table->foreignUlid('dibuat_oleh');
-                $table->foreign('dibuat_oleh', 'mutasi_pembuat_fk')
-                    ->references('id')->on('users')->restrictOnDelete();
+                $table
+                    ->foreign('dibuat_oleh', 'mutasi_pembuat_fk')
+                    ->references('id')
+                    ->on('users')
+                    ->restrictOnDelete();
                 $table->timestamp('dibuat_pada')->nullable();
                 $table->timestamp('diperbarui_pada')->nullable();
                 $table->index(['supplier_id', 'tanggal']);
