@@ -23,7 +23,7 @@ class Supplier extends Model
 
     public const UPDATED_AT = 'diperbarui_pada';
 
-    protected function casts(): array
+    public function pembelian(): HasMany\n    {\n        return $this->hasMany(Pembelian::class, 'supplier_id');\n    }\n\n    public function pembayaran(): HasMany\n    {\n        return $this->hasMany(PembayaranPembelian::class, 'supplier_id');\n    }\n\n    public function mutasiSaldo(): HasMany\n    {\n        return $this->hasMany(MutasiSaldoSupplier::class, 'supplier_id');\n    }\n\n    protected function casts(): array
     {
         return [
             'aktif' => 'boolean',
