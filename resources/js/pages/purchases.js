@@ -163,6 +163,7 @@ const bindSupplierPicker = root => {
     });
 };
 bindSupplierPicker(document);
+bindMoneyInputs(document);
 
 const updateUnits = (row, units = [], selectedUnit = "") => {
     const unitSelect = field(row, "satuan_produk_id");
