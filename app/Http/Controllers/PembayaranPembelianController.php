@@ -63,7 +63,7 @@ class PembayaranPembelianController extends Controller
             'supplier_id' => ['required', 'ulid', 'exists:supplier,id'],
             'tanggal_pembayaran' => ['required', 'date'],
             'total_bayar' => ['required', 'numeric', 'gt:0'],
-            'metode_pembayaran' => ['required', 'in:tunai,transfer_qris'],
+            'metode_pembayaran' => ['required', 'in:tunai,transfer'],
             'referensi_pembayaran' => ['nullable', 'string', 'max:150'],
             'catatan' => ['nullable', 'string', 'max:3000'],
             'alokasi' => ['required', 'array', 'min:1'],
