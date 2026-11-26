@@ -10,9 +10,10 @@
         <p class="mt-2 text-sm text-slate-500">Kelola kelebihan pembayaran yang belum diselesaikan, saldo titipan, dan riwayat mutasi supplier.</p>
     </div>
 
+    <div data-balance-results>
     @if(session('success'))<div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
 
-    <form method="GET" class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+    <form method="GET" action="{{ route('purchases.balances.index') }}" data-balance-filter class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
         <select name="supplier_id" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm sm:max-w-xs">
             <option value="">Semua supplier</option>
             @foreach($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected(request('supplier_id') === $supplier->id)>{{ $supplier->nama }}</option>@endforeach
@@ -40,7 +41,7 @@
                             <td class="px-5 py-4">
                                 <details class="group">
                                     <summary class="cursor-pointer list-none rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50">Selesaikan</summary>
-                                    <form method="POST" action="{{ route('purchases.balances.settle', $item) }}" class="mt-3 min-w-64 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                    <form method="POST" data-balance-ajax action="{{ route('purchases.balances.settle', $item) }}" class="mt-3 min-w-64 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
                                         @csrf
                                         <label class="block text-xs font-medium text-slate-600">Tindakan</label>
                                         <select name="jenis" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"><option value="titipan">Jadikan titipan</option><option value="pengembalian">Catat pengembalian</option></select>
@@ -75,7 +76,7 @@
                         <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-slate-700">{{ $balance->supplier?->nama }}</span><span class="font-semibold tabular-nums text-emerald-700">Rp {{ number_format((float) $balance->saldo, 0, ',', '.') }}</span></div>
                         <details class="mt-3">
                             <summary class="cursor-pointer text-xs font-semibold text-emerald-700">Gunakan titipan untuk membayar nota</summary>
-                            <form method="POST" action="{{ route('purchases.balances.use', $balance->supplier_id) }}" class="mt-3 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <form method="POST" data-balance-ajax action="{{ route('purchases.balances.use', $balance->supplier_id) }}" class="mt-3 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
                                 @csrf
                                 <div><label class="mb-1 block text-xs font-medium text-slate-600">Tanggal penggunaan</label><input type="date" name="tanggal" value="{{ now()->toDateString() }}" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"></div>
                                 @forelse(($openInvoices[$balance->supplier_id] ?? collect()) as $invoice)
@@ -122,4 +123,5 @@
         </tbody></table></div>
         <div class="border-t border-slate-100 px-5 py-4">{{ $settlements->onEachSide(1)->links('vendor.pagination.kasiron') }}</div>
     </section>
+    </div>
 @endsection
