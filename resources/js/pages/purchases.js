@@ -860,14 +860,28 @@ if (paymentListResults) {
 }
 
 
-// Payment date range: end date follows start date until the user edits it manually.
+// Payment date range: adjust the end date only when the start date is
+// today or later, and earlier than the current end date.
 let paymentEndDateManuallyChanged = false;
 
 document.addEventListener("change", event => {
     if (event.target.matches("[data-payment-date-from]")) {
         const dateFrom = event.target;
         const dateTo = document.querySelector("[data-payment-date-to]");
-        if (dateTo && !paymentEndDateManuallyChanged) {
+        const today = new Date();
+        const todayLocal = [
+            today.getFullYear(),
+            String(today.getMonth() + 1).padStart(2, "0"),
+            String(today.getDate()).padStart(2, "0")
+        ].join("-");
+
+        if (
+            dateTo &&
+            !paymentEndDateManuallyChanged &&
+            dateFrom.value >= todayLocal &&
+            dateTo.value &&
+            dateFrom.value < dateTo.value
+        ) {
             dateTo.value = dateFrom.value;
         }
     }
