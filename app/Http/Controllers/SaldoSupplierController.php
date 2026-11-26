@@ -27,6 +27,7 @@ class SaldoSupplierController extends Controller
             ->withQueryString();
 
         $balances = MutasiSaldoSupplier::query()
+            ->when($request->filled('supplier_id'), fn ($q) => $q->where('supplier_id', $request->supplier_id))
             ->select('supplier_id')
             ->selectRaw("SUM(CASE WHEN jenis = 'masuk' THEN jumlah ELSE -jumlah END) as saldo")
             ->with('supplier')
@@ -44,6 +45,7 @@ class SaldoSupplierController extends Controller
             ->groupBy('supplier_id');
 
         $mutations = MutasiSaldoSupplier::query()
+            ->when($request->filled('supplier_id'), fn ($q) => $q->where('supplier_id', $request->supplier_id))
             ->with('supplier')
             ->latest('tanggal')
             ->paginate(10, ['*'], 'mutasi_page')
