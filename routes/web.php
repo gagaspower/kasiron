@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembayaran', [PembayaranPembelianController::class, 'index'])->name('payments.index');
         Route::get('/pembayaran/tambah', [PembayaranPembelianController::class, 'create'])->name('payments.create');
         Route::post('/pembayaran', [PembayaranPembelianController::class, 'store'])->name('payments.store');
+        Route::get('/pembayaran/{pembayaran}', [PembayaranPembelianController::class, 'show'])->name('payments.show');
 
         Route::get('/saldo-kelebihan', [SaldoSupplierController::class, 'index'])->name('balances.index');
         Route::post('/saldo-kelebihan/{kelebihan}/selesaikan', [SaldoSupplierController::class, 'settle'])->name('balances.settle');
