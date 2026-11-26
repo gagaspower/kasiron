@@ -15,7 +15,14 @@
             <button type="submit" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Filter</button>
             <a href="{{ route('purchases.payments.index') }}" data-payment-list-reset class="rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-500 hover:bg-slate-50">Reset</a>
         </form>
-        <p class="px-5 pt-4 text-xs text-slate-500">Untuk melihat detail pembayaran, klik nomor pembayaran pada daftar.</p>
+    </section>
+
+    <div class="mb-4 mt-4 flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800" role="alert">
+        <span class="mt-0.5 shrink-0 text-base" aria-hidden="true">ⓘ</span>
+        <p>Untuk melihat detail pembayaran, klik nomor pembayaran pada daftar.</p>
+    </div>
+
+    <section class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div class="overflow-x-auto"><table class="w-full min-w-[800px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Nomor pembayaran</th><th class="px-3 py-3">Tanggal</th><th class="px-3 py-3">Supplier</th><th class="px-3 py-3">Metode</th><th class="px-3 py-3">Status</th><th class="px-3 py-3 text-right">Nota</th><th class="px-5 py-3 text-right">Total dibayar</th></tr></thead><tbody class="divide-y divide-slate-100">
             @forelse($payments as $payment)<tr><td class="px-5 py-4"><a href="{{ route('purchases.payments.show', $payment) }}" class="font-semibold text-slate-800 hover:text-emerald-700">{{ $payment->nomor_pembayaran }}</a></td><td class="px-3 py-4 text-slate-600">{{ $payment->tanggal_pembayaran?->format('d M Y') }}</td><td class="px-3 py-4">{{ $payment->supplier?->nama }}</td><td class="px-3 py-4 capitalize text-slate-600">{{ $payment->metode_pembayaran }}</td><td class="px-3 py-4">@if($payment->status === 'dibatalkan')<span class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">Dibatalkan</span>@else<span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Aktif</span>@endif</td><td class="px-3 py-4 text-right tabular-nums">{{ $payment->detail->count() }}</td><td class="px-5 py-4 text-right font-semibold tabular-nums">Rp {{ number_format((float) $payment->total_bayar, 0, ',', '.') }}</td></tr>
             @empty<tr><td colspan="7" class="px-5 py-12 text-center text-sm text-slate-500">Belum ada pembayaran pembelian.</td></tr>@endforelse
