@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'nomor_pembayaran',
-    'pembelian_id',
+    'supplier_id',
     'tanggal_pembayaran',
-    'jumlah_bayar',
+    'total_bayar',
     'metode_pembayaran',
     'referensi_pembayaran',
     'catatan',
@@ -27,9 +28,19 @@ class PembayaranPembelian extends Model
 
     public const UPDATED_AT = 'diperbarui_pada';
 
-    public function pembelian(): BelongsTo
+    public function supplier(): BelongsTo
     {
-        return $this->belongsTo(Pembelian::class, 'pembelian_id');
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function detail(): HasMany
+    {
+        return $this->hasMany(PembayaranPembelianDetail::class, 'pembayaran_pembelian_id');
+    }
+
+    public function kelebihan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(KelebihanPembayaranSupplier::class, 'pembayaran_pembelian_id');
     }
 
     public function dibuatOleh(): BelongsTo
@@ -41,7 +52,7 @@ class PembayaranPembelian extends Model
     {
         return [
             'tanggal_pembayaran' => 'date',
-            'jumlah_bayar' => 'decimal:2',
+            'total_bayar' => 'decimal:2',
         ];
     }
 }
