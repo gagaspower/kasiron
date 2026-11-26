@@ -18,11 +18,14 @@ class PembayaranPembelianController extends Controller
 {
     public function index(Request $request)
     {
+        $tanggalMulai = $request->input('tanggal_mulai', now()->toDateString());
+        $tanggalSelesai = $request->input('tanggal_selesai', $tanggalMulai);
+
         $payments = PembayaranPembelian::query()
             ->with(['supplier', 'detail'])
             ->when($request->filled('supplier_id'), fn (Builder $q) => $q->where('supplier_id', $request->supplier_id))
-            ->when($request->filled('tanggal_mulai'), fn (Builder $q) => $q->whereDate('tanggal_pembayaran', '>=', $request->tanggal_mulai))
-            ->when($request->filled('tanggal_selesai'), fn (Builder $q) => $q->whereDate('tanggal_pembayaran', '<=', $request->tanggal_selesai))
+            ->when($tanggalMulai, fn (Builder $q) => $q->whereDate('tanggal_pembayaran', '>=', $tanggalMulai))
+            ->when($tanggalSelesai, fn (Builder $q) => $q->whereDate('tanggal_pembayaran', '<=', $tanggalSelesai))
             ->latest('tanggal_pembayaran')
             ->paginate(10)
             ->withQueryString();
@@ -30,6 +33,8 @@ class PembayaranPembelianController extends Controller
         $data = [
             'payments' => $payments,
             'suppliers' => Supplier::query()->where('aktif', true)->orderBy('nama')->get(),
+            'tanggalMulai' => $tanggalMulai,
+            'tanggalSelesai' => $tanggalSelesai,
         ];
 
         if ($request->expectsJson()) {
