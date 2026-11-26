@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <section aria-label="Menu pembelian" class="grid gap-4 lg:grid-cols-3">
+    <section aria-label="Menu pembelian" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <a href="{{ route('purchases.transactions.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg sm:p-6">
             <div class="flex items-start justify-between gap-3">
                 <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-100/80">
