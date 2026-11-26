@@ -110,4 +110,16 @@
             <div class="border-t border-slate-100 px-5 py-4">{{ $mutations->onEachSide(1)->links('vendor.pagination.kasiron') }}</div>
         </section>
     </div>
+
+    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-5 py-4"><h2 class="font-semibold text-slate-900">Riwayat penyelesaian kelebihan</h2><p class="mt-1 text-xs text-slate-500">Termasuk perubahan menjadi titipan dan pengembalian uang dari supplier.</p></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[700px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Tanggal</th><th class="px-3 py-3">Supplier</th><th class="px-3 py-3">Nomor kelebihan</th><th class="px-3 py-3">Penyelesaian</th><th class="px-5 py-3 text-right">Nominal</th></tr></thead><tbody class="divide-y divide-slate-100">
+            @forelse($settlements as $settlement)
+                <tr><td class="px-5 py-3 text-slate-600">{{ $settlement->tanggal?->format('d M Y') }}</td><td class="px-3 py-3 text-slate-700">{{ $settlement->kelebihan?->supplier?->nama }}</td><td class="px-3 py-3 text-slate-600">{{ $settlement->kelebihan?->nomor_kelebihan }}</td><td class="px-3 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-medium {{ $settlement->jenis === 'titipan' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700' }}">{{ $settlement->jenis === 'titipan' ? 'Dijadikan titipan' : 'Dikembalikan' }}</span></td><td class="px-5 py-3 text-right font-semibold tabular-nums">Rp {{ number_format((float) $settlement->jumlah, 0, ',', '.') }}</td></tr>
+            @empty
+                <tr><td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">Belum ada penyelesaian kelebihan pembayaran.</td></tr>
+            @endforelse
+        </tbody></table></div>
+        <div class="border-t border-slate-100 px-5 py-4">{{ $settlements->onEachSide(1)->links('vendor.pagination.kasiron') }}</div>
+    </section>
 @endsection
