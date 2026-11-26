@@ -851,7 +851,8 @@ if (paymentListResults) {
     });
 
     window.addEventListener("popstate", async () => {
-        if (window.location.pathname !== new URL("{{ route('purchases.payments.index') }}", window.location.origin).pathname) return;
+        const resetUrl = paymentListResults.querySelector("[data-payment-list-reset]")?.href;
+        if (resetUrl && window.location.pathname !== new URL(resetUrl).pathname) return;
         try { await refreshPaymentList(window.location.href, false); }
         catch (error) { showPaymentListError(error.message || "Gagal memuat daftar pembayaran."); setPaymentListLoading(false); }
     });
