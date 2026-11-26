@@ -24,7 +24,7 @@
             @foreach($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected(request('supplier_id') === $supplier->id)>{{ $supplier->nama }}</option>@endforeach
         </select>
         <button class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Filter</button>
-        @if(request('supplier_id'))<a href="{{ route('purchases.balances.index') }}" class="rounded-xl px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50">Reset</a>@endif
+        @if(request('supplier_id'))<a data-balance-reset href="{{ route('purchases.balances.index') }}" class="rounded-xl px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50">Reset</a>@endif
     </form>
 
     <section class="mb-6 rounded-2xl border border-slate-200/80 bg-white shadow-sm">
