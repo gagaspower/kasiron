@@ -52,7 +52,8 @@ class SaldoSupplierController extends Controller
         return view('purchases.balances.index', [
             'overpayments' => $overpayments,
             'balances' => $balances,
-            'mutations' => $mutations,\n            'openInvoices' => $openInvoices,
+            'mutations' => $mutations,
+            'openInvoices' => $openInvoices,
             'suppliers' => Supplier::query()->orderBy('nama')->get(),
             'navigation' => app(PembelianController::class)->navigationForView(),
         ]);
