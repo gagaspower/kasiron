@@ -16,7 +16,7 @@ use Illuminate\View\View;
 
 class PembayaranPembelianController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $payments = PembayaranPembelian::query()
             ->with(['supplier', 'detail'])
