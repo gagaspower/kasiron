@@ -36,17 +36,11 @@ class Pembelian extends Model
     public const UPDATED_AT = 'diperbarui_pada';
 
     public const STATUS_DRAFT = 'draft';
-
     public const STATUS_DISETUJUI = 'disetujui';
-
     public const STATUS_SEBAGIAN_DITERIMA = 'sebagian_diterima';
-
     public const STATUS_DITERIMA = 'diterima';
-
     public const STATUS_DIBATALKAN = 'dibatalkan';
-
     public const JENIS_PEMBAYARAN_TUNAI = 'tunai';
-
     public const JENIS_PEMBAYARAN_KREDIT = 'kredit';
 
     public function supplier(): BelongsTo
@@ -66,7 +60,12 @@ class Pembelian extends Model
 
     public function pembayaran(): HasMany
     {
-        return $this->hasMany(PembayaranPembelian::class, 'pembelian_id');
+        return $this->hasManyThrough(PembayaranPembelian::class, PembayaranPembelianDetail::class, 'pembelian_id', 'id', 'id', 'pembayaran_pembelian_id');
+    }
+
+    public function pembayaranDetail(): HasMany
+    {
+        return $this->hasMany(PembayaranPembelianDetail::class, 'pembelian_id');
     }
 
     public function dibuatOleh(): BelongsTo
