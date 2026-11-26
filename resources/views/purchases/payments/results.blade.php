@@ -17,9 +17,9 @@
         </form>
     </section>
 
-    <div class="mb-4 mt-4 flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800" role="alert">
-        <span class="mt-0.5 shrink-0 text-base" aria-hidden="true">ⓘ</span>
-        <p>Untuk melihat detail pembayaran, klik nomor pembayaran pada daftar.</p>
+    <div class="mb-4 mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800" role="alert">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center text-base leading-none" aria-hidden="true">ⓘ</span>
+        <p class="m-0 leading-5">Untuk melihat detail pembayaran, klik nomor pembayaran pada daftar.</p>
     </div>
 
     <section class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
