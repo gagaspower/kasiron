@@ -63,6 +63,7 @@ class PembelianController extends Controller
         return view('purchases.transactions.form', [
             'pembelian' => new Pembelian([
                 'tanggal_pembelian' => now()->toDateString(),
+                'tanggal_jatuh_tempo' => now()->toDateString(),
                 'status' => Pembelian::STATUS_DRAFT,
                 'jenis_pembayaran' => Pembelian::JENIS_PEMBAYARAN_TUNAI,
             ]),
@@ -210,6 +211,10 @@ class PembelianController extends Controller
 
     private function validatePurchase(Request $request, ?Pembelian $pembelian = null): array
     {
+        if ($request->input('jenis_pembayaran') === Pembelian::JENIS_PEMBAYARAN_KREDIT && blank($request->input('tanggal_jatuh_tempo'))) {
+            $request->merge(['tanggal_jatuh_tempo' => now()->toDateString()]);
+        }
+
         $validated = $request->validate([
             'supplier_id' => ['required', 'ulid', 'exists:supplier,id'],
             'nomor_faktur_supplier' => ['nullable', 'string', 'max:100'],
