@@ -16,6 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'metode_pembayaran',
     'referensi_pembayaran',
     'catatan',
+    'status',
+    'alasan_pembatalan',
+    'dibatalkan_oleh',
+    'dibatalkan_pada',
     'dibuat_oleh',
 ])]
 class PembayaranPembelian extends Model
@@ -27,6 +31,14 @@ class PembayaranPembelian extends Model
     public const CREATED_AT = 'dibuat_pada';
 
     public const UPDATED_AT = 'diperbarui_pada';
+
+    public const STATUS_AKTIF = 'aktif';
+    public const STATUS_DIBATALKAN = 'dibatalkan';
+
+    public function dibatalkanOleh(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dibatalkan_oleh');
+    }
 
     public function supplier(): BelongsTo
     {
@@ -53,6 +65,7 @@ class PembayaranPembelian extends Model
         return [
             'tanggal_pembayaran' => 'date',
             'total_bayar' => 'decimal:2',
+            'dibatalkan_pada' => 'datetime',
         ];
     }
 }
