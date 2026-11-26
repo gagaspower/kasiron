@@ -63,5 +63,21 @@
             </div>
             <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-violet-700 transition group-hover:gap-2">Buka pembayaran <span aria-hidden="true">→</span></span>
         </a>
+
+        <a href="{{ route('purchases.balances.index') }}" class="group flex min-h-[172px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.025] transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-lg sm:p-6">
+            <div class="flex items-start justify-between gap-3">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100/80">
+                    <svg class="size-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3.5 7.5h17v11h-17zM3.5 10h17M7 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16.5 3.5v4M14.5 5.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="mt-5">
+                <h2 class="text-base font-semibold text-slate-900">Saldo & Kelebihan Pembayaran</h2>
+                <p class="mt-1 text-sm leading-5 text-slate-500">Kelola uang lebih dari pembayaran, catat pengembalian, dan gunakan saldo titipan untuk membayar nota.</p>
+            </div>
+            <span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-amber-700 transition group-hover:gap-2">Kelola saldo <span aria-hidden="true">→</span></span>
+        </a>
     </section>
 @endsection
