@@ -65,7 +65,8 @@ class Pembelian extends Model
 
     public function pembayaranDetail(): HasMany
     {
-        return $this->hasMany(PembayaranPembelianDetail::class, 'pembelian_id');
+        return $this->hasMany(PembayaranPembelianDetail::class, 'pembelian_id')
+            ->whereHas('pembayaran', fn ($query) => $query->where('status', PembayaranPembelian::STATUS_AKTIF));
     }
 
     public function dibuatOleh(): BelongsTo
