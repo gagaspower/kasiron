@@ -1,16 +1,16 @@
 <?php
 
-use App\\Http\\Controllers\\DashboardController;
-use App\\Http\\Controllers\\KategoriController;
-use App\\Http\\Controllers\\LoginController;
-use App\\Http\\Controllers\\ProdukController;
-use App\\Http\\Controllers\\SatuanController;
-use App\\Http\\Controllers\\SupplierController;
-use App\\Http\\Controllers\\PembelianController;
-use App\\Http\\Controllers\\PenerimaanPembelianController;
-use App\\Http\\Controllers\\PembayaranPembelianController;
-use App\\Http\\Controllers\\SaldoSupplierController;
-use Illuminate\\Support\\Facades\\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\SatuanController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PembelianController;
+use App\Http\Controllers\PenerimaanPembelianController;
+use App\Http\Controllers\PembayaranPembelianController;
+use App\Http\Controllers\SaldoSupplierController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
