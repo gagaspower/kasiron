@@ -181,4 +181,4 @@ class SaldoSupplierController extends Controller
 
         return redirect()->route('purchases.balances.index')->with('success', 'Saldo titipan berhasil digunakan untuk membayar nota pembelian.');
     }
-}\n
+}
