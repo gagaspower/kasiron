@@ -176,9 +176,188 @@ class PembayaranPembelianController extends Controller
         return redirect()->route('purchases.payments.index')->with('success', 'Pembayaran pembelian berhasil dicatat.');
     }
 
+    public function edit(PembayaranPembelian $pembayaran): View
+    {
+        $pembayaran->load(['supplier', 'detail']);
+        $this->ensureCanBeRevised($pembayaran);
+
+        $currentAllocations = $pembayaran->detail->keyBy('pembelian_id');
+        $invoices = Pembelian::query()
+            ->where('supplier_id', $pembayaran->supplier_id)
+            ->whereIn('status', [Pembelian::STATUS_DISETUJUI, Pembelian::STATUS_SEBAGIAN_DITERIMA, Pembelian::STATUS_DITERIMA])
+            ->withSum('pembayaranDetail as sudah_dibayar', 'jumlah_bayar')
+            ->orderBy('tanggal_pembelian')
+            ->get()
+            ->filter(function ($invoice) use ($currentAllocations) {
+                $ownAllocation = (float) ($currentAllocations->get($invoice->id)?->jumlah_bayar ?? 0);
+                return round((float) $invoice->total - (float) $invoice->sudah_dibayar + $ownAllocation, 2) > 0
+                    || $ownAllocation > 0;
+            });
+
+        return view('purchases.payments.edit', [
+            'payment' => $pembayaran,
+            'invoices' => $invoices,
+            'currentAllocations' => $currentAllocations,
+            'navigation' => app(PembelianController::class)->navigationForView(),
+        ]);
+    }
+
+    public function update(Request $request, PembayaranPembelian $pembayaran)
+    {
+        $data = $request->validate([
+            'tanggal_pembayaran' => ['required', 'date'],
+            'total_bayar' => ['required', 'numeric', 'gt:0'],
+            'metode_pembayaran' => ['required', 'in:tunai,transfer'],
+            'referensi_pembayaran' => ['nullable', 'string', 'max:150'],
+            'catatan' => ['nullable', 'string', 'max:3000'],
+            'alokasi' => ['required', 'array', 'min:1'],
+            'alokasi.*' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        DB::transaction(function () use ($data, $request, $pembayaran) {
+            $payment = PembayaranPembelian::query()->whereKey($pembayaran->id)->lockForUpdate()->firstOrFail();
+            $this->ensureCanBeRevised($payment, true);
+            $supplier = Supplier::query()->whereKey($payment->supplier_id)->lockForUpdate()->firstOrFail();
+
+            $allocations = collect($data['alokasi'])
+                ->map(fn ($amount, $id) => ['pembelian_id' => $id, 'jumlah_bayar' => round((float) $amount, 2)])
+                ->filter(fn ($row) => $row['jumlah_bayar'] > 0)
+                ->values();
+
+            if ($allocations->isEmpty()) {
+                throw ValidationException::withMessages(['alokasi' => 'Isi nominal pembayaran minimal pada satu nota.']);
+            }
+
+            $invoiceIds = $allocations->pluck('pembelian_id');
+            $invoices = Pembelian::query()->whereIn('id', $invoiceIds)->lockForUpdate()->get()->keyBy('id');
+            if ($invoices->count() !== $invoiceIds->unique()->count()) {
+                throw ValidationException::withMessages(['alokasi' => 'Ada nota pembelian yang tidak ditemukan.']);
+            }
+
+            $allocated = 0;
+            foreach ($allocations as $row) {
+                $invoice = $invoices->get($row['pembelian_id']);
+                if ($invoice->supplier_id !== $supplier->id || in_array($invoice->status, [Pembelian::STATUS_DRAFT, Pembelian::STATUS_DIBATALKAN], true)) {
+                    throw ValidationException::withMessages(['alokasi' => 'Nota harus berasal dari supplier yang sama dan bukan draft atau dibatalkan.']);
+                }
+
+                $paidOtherPayments = (float) $invoice->pembayaranDetail()
+                    ->where('pembayaran_pembelian_id', '!=', $payment->id)
+                    ->sum('jumlah_bayar');
+                $remaining = round((float) $invoice->total - $paidOtherPayments, 2);
+                if ($row['jumlah_bayar'] > $remaining) {
+                    throw ValidationException::withMessages(['alokasi' => 'Alokasi melebihi sisa tagihan nota ' . $invoice->nomor_pembelian . '.']);
+                }
+                $allocated += $row['jumlah_bayar'];
+            }
+
+            $total = round((float) $data['total_bayar'], 2);
+            if ($allocated > $total) {
+                throw ValidationException::withMessages(['total_bayar' => 'Total alokasi tidak boleh melebihi uang yang dibayarkan.']);
+            }
+
+            $payment->update([
+                'tanggal_pembayaran' => $data['tanggal_pembayaran'],
+                'total_bayar' => $total,
+                'metode_pembayaran' => $data['metode_pembayaran'],
+                'referensi_pembayaran' => $data['referensi_pembayaran'] ?? null,
+                'catatan' => $data['catatan'] ?? null,
+            ]);
+
+            $payment->detail()->delete();
+            foreach ($allocations as $row) {
+                $payment->detail()->create($row);
+            }
+
+            $excessAmount = round($total - $allocated, 2);
+            $overpayment = KelebihanPembayaranSupplier::query()
+                ->where('pembayaran_pembelian_id', $payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($excessAmount > 0) {
+                $attributes = [
+                    'supplier_id' => $supplier->id,
+                    'jumlah_kelebihan' => $excessAmount,
+                    'tanggal' => $data['tanggal_pembayaran'],
+                    'catatan' => $data['catatan'] ?? null,
+                ];
+
+                if ($overpayment) {
+                    $overpayment->update($attributes);
+                } else {
+                    KelebihanPembayaranSupplier::create($attributes + [
+                        'nomor_kelebihan' => 'KL-' . now()->format('Ymd') . '-' . Str::upper(Str::random(5)),
+                        'pembayaran_pembelian_id' => $payment->id,
+                        'dibuat_oleh' => $request->user()->id,
+                    ]);
+                }
+            } elseif ($overpayment) {
+                $overpayment->delete();
+            }
+        });
+
+        return redirect()->route('purchases.payments.show', $pembayaran)->with('success', 'Pembayaran berhasil direvisi.');
+    }
+
+    public function cancel(Request $request, PembayaranPembelian $pembayaran)
+    {
+        $data = $request->validate([
+            'alasan_pembatalan' => ['required', 'string', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($data, $request, $pembayaran) {
+            $payment = PembayaranPembelian::query()->whereKey($pembayaran->id)->lockForUpdate()->firstOrFail();
+            $this->ensureCanBeRevised($payment, true);
+
+            $overpayment = KelebihanPembayaranSupplier::query()
+                ->where('pembayaran_pembelian_id', $payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($overpayment) {
+                $overpayment->delete();
+            }
+
+            $payment->update([
+                'status' => PembayaranPembelian::STATUS_DIBATALKAN,
+                'alasan_pembatalan' => $data['alasan_pembatalan'],
+                'dibatalkan_oleh' => $request->user()->id,
+                'dibatalkan_pada' => now(),
+            ]);
+        });
+
+        return redirect()->route('purchases.payments.show', $pembayaran)->with('success', 'Pembayaran berhasil dibatalkan.');
+    }
+
+    private function ensureCanBeRevised(PembayaranPembelian $payment, bool $lock = false): void
+    {
+        if ($payment->status !== PembayaranPembelian::STATUS_AKTIF) {
+            throw ValidationException::withMessages(['pembayaran' => 'Pembayaran yang sudah dibatalkan tidak dapat direvisi atau dibatalkan kembali.']);
+        }
+
+        $overpaymentQuery = KelebihanPembayaranSupplier::query()
+            ->where('pembayaran_pembelian_id', $payment->id);
+        if ($lock) {
+            $overpaymentQuery->lockForUpdate();
+        }
+        $overpayment = $overpaymentQuery->first();
+
+        if ($overpayment && $overpayment->penyelesaian()->exists()) {
+            throw ValidationException::withMessages(['pembayaran' => 'Pembayaran tidak dapat direvisi atau dibatalkan karena kelebihannya sudah diselesaikan sebagai titipan atau pengembalian.']);
+        }
+
+        if (\App\Models\MutasiSaldoSupplier::query()
+            ->where('referensi_tipe', 'pembayaran_pembelian')
+            ->where('referensi_id', $payment->id)
+            ->exists()) {
+            throw ValidationException::withMessages(['pembayaran' => 'Pembayaran tidak dapat direvisi atau dibatalkan karena sudah menggunakan saldo titipan supplier.']);
+        }
+    }
+
     public function show(PembayaranPembelian $pembayaran): View
     {
-        $pembayaran->load(['supplier', 'detail.pembelian', 'kelebihan.penyelesaian']);
+        $pembayaran->load(['supplier', 'detail.pembelian', 'kelebihan.penyelesaian', 'dibatalkanOleh']);
 
         return view('purchases.payments.show', [
             'payment' => $pembayaran,
