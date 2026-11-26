@@ -44,9 +44,6 @@ class PembayaranPembelianController extends Controller
                 ->where('supplier_id', $supplierId)
                 ->whereIn('status', [Pembelian::STATUS_DISETUJUI, Pembelian::STATUS_SEBAGIAN_DITERIMA, Pembelian::STATUS_DITERIMA])
                 ->withSum('pembayaranDetail as sudah_dibayar', 'jumlah_bayar')
-                ->whereDoesntHave('pembayaranDetail', function ($query) {
-                    $query->whereRaw('1 = 0');
-                })
                 ->orderBy('tanggal_pembelian')
                 ->get()
                 ->filter(fn ($invoice) => round((float) $invoice->total - (float) $invoice->sudah_dibayar, 2) > 0);
