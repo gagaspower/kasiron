@@ -10,8 +10,8 @@
                 </div>
                 <div id="payment-list-supplier-options" data-purchase-supplier-options class="absolute z-30 mt-1 hidden max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg" role="listbox"></div>
             </div>
-            <label class="block"><span class="mb-1.5 block text-xs font-semibold text-slate-600">Tanggal pembayaran dari</span><input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"></label>
-            <label class="block"><span class="mb-1.5 block text-xs font-semibold text-slate-600">Tanggal pembayaran sampai</span><input type="date" name="tanggal_selesai" value="{{ request('tanggal_selesai') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"></label>
+            <label class="block"><span class="mb-1.5 block text-xs font-semibold text-slate-600">Tanggal pembayaran dari</span><input type="date" name="tanggal_mulai" value="{{ $tanggalMulai }}" data-payment-date-from class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"></label>
+            <label class="block"><span class="mb-1.5 block text-xs font-semibold text-slate-600">Tanggal pembayaran sampai</span><input type="date" name="tanggal_selesai" value="{{ $tanggalSelesai }}" data-payment-date-to class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"></label>
             <button type="submit" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Filter</button>
             <a href="{{ route('purchases.payments.index') }}" data-payment-list-reset class="rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-500 hover:bg-slate-50">Reset</a>
         </form>
