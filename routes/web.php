@@ -8,6 +8,8 @@ use App\\Http\\Controllers\\SatuanController;
 use App\\Http\\Controllers\\SupplierController;
 use App\\Http\\Controllers\\PembelianController;
 use App\\Http\\Controllers\\PenerimaanPembelianController;
+use App\\Http\\Controllers\\PembayaranPembelianController;
+use App\\Http\\Controllers\\SaldoSupplierController;
 use Illuminate\\Support\\Facades\\Route;
 
 /*
@@ -97,9 +99,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/{pembelian}/penerimaan', [PenerimaanPembelianController::class, 'store'])
             ->name('receipts.store');
 
-        Route::get('/pembayaran', fn () => view('purchases.payments', [
-            'navigation' => app(PembelianController::class)->navigationForView(),
-        ]))->name('payments.index');
+        Route::get('/pembayaran', [PembayaranPembelianController::class, 'index'])->name('payments.index');
+        Route::get('/pembayaran/tambah', [PembayaranPembelianController::class, 'create'])->name('payments.create');
+        Route::post('/pembayaran', [PembayaranPembelianController::class, 'store'])->name('payments.store');
+
+        Route::get('/saldo-kelebihan', [SaldoSupplierController::class, 'index'])->name('balances.index');
+        Route::post('/saldo-kelebihan/{kelebihan}/selesaikan', [SaldoSupplierController::class, 'settle'])->name('balances.settle');
 
         Route::get('/tambah', [PembelianController::class, 'create'])->name('create');
         Route::post('/', [PembelianController::class, 'store'])->name('store');
