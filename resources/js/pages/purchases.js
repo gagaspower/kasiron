@@ -650,3 +650,114 @@ if (balanceResults) {
         catch (error) { showBalanceError(error.message || "Gagal memuat halaman."); setBalanceLoading(false); }
     });
 }
+
+
+// Supplier payment creation: AJAX invoice loading and Rupiah display-only input.
+const paymentInvoiceFilter = document.querySelector("[data-payment-invoice-filter]");
+const paymentInvoiceContent = document.querySelector("[data-payment-invoice-content]");
+if (paymentInvoiceFilter && paymentInvoiceContent) {
+    let invoiceRequest = 0;
+    const showButton = paymentInvoiceFilter.querySelector("[data-payment-show-invoices]");
+    const buttonLabel = showButton?.querySelector("[data-payment-button-label]");
+    const buttonSpinner = showButton?.querySelector("[data-payment-button-spinner]");
+
+    const loadPaymentInvoices = async (url, pushHistory = true) => {
+        const requestId = ++invoiceRequest;
+        showButton.disabled = true;
+        buttonLabel.textContent = "Memuat nota...";
+        buttonSpinner.classList.remove("hidden");
+        paymentInvoiceContent.classList.add("relative", "min-h-[120px]");
+        const overlay = document.createElement("div");
+        overlay.className = "absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75";
+        overlay.innerHTML = '<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm"><span class="size-5 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-600"></span><span>Memuat daftar nota...</span></div>';
+        paymentInvoiceContent.append(overlay);
+        try {
+            const response = await fetch(url, {
+                headers: { "X-Requested-With": "XMLHttpRequest", Accept: "text/html" },
+                credentials: "same-origin"
+            });
+            if (!response.ok) throw new Error("Gagal memuat nota supplier.");
+            const html = await response.text();
+            const parsed = new DOMParser().parseFromString(html, "text/html");
+            const updated = parsed.querySelector("[data-payment-invoice-content]");
+            if (!updated) throw new Error("Daftar nota tidak ditemukan.");
+            if (requestId !== invoiceRequest) return;
+            paymentInvoiceContent.innerHTML = updated.innerHTML;
+            if (pushHistory) window.history.pushState({}, "", response.url || url);
+            bindPaymentTotalInput(paymentInvoiceContent);
+        } catch (error) {
+            let notice = paymentInvoiceContent.querySelector("[data-payment-load-error]");
+            if (!notice) {
+                notice = document.createElement("div");
+                notice.dataset.paymentLoadError = "";
+                notice.className = "rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700";
+                paymentInvoiceContent.prepend(notice);
+            }
+            notice.textContent = error.message;
+        } finally {
+            if (requestId === invoiceRequest) {
+                overlay.remove();
+                paymentInvoiceContent.classList.remove("relative", "min-h-[120px]");
+                showButton.disabled = false;
+                buttonLabel.textContent = "Tampilkan Nota";
+                buttonSpinner.classList.add("hidden");
+            }
+        }
+    };
+
+    paymentInvoiceFilter.addEventListener("submit", event => {
+        event.preventDefault();
+        const supplierId = paymentInvoiceFilter.querySelector("[data-purchase-supplier-value]")?.value;
+        if (!supplierId) {
+            paymentInvoiceFilter.querySelector("[data-purchase-supplier-search]")?.focus();
+            return;
+        }
+        const url = new URL(paymentInvoiceFilter.action, window.location.origin);
+        url.searchParams.set("supplier_id", supplierId);
+        loadPaymentInvoices(url);
+    });
+
+    window.addEventListener("popstate", () => {
+        if (window.location.pathname === paymentInvoiceFilter.action || window.location.pathname === new URL(paymentInvoiceFilter.action).pathname) {
+            loadPaymentInvoices(window.location.href, false);
+        }
+    });
+}
+
+function bindPaymentTotalInput(root = document) {
+    const display = root.querySelector("[data-payment-total-display]");
+    const raw = root.querySelector("[data-payment-total-raw]");
+    if (!display || !raw || display.dataset.bound === "true") return;
+    display.dataset.bound = "true";
+    const digitsOnly = value => String(value || "").replace(/[^0-9]/g, "");
+    const format = value => {
+        const digits = digitsOnly(value);
+        return digits ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(digits)) : "";
+    };
+    display.addEventListener("focus", () => {
+        if (raw.value === "0" || display.value === "0") display.value = "";
+        else display.value = digitsOnly(display.value);
+        display.select();
+    });
+    display.addEventListener("input", () => {
+        const cursor = display.selectionStart ?? display.value.length;
+        const before = digitsOnly(display.value.slice(0, cursor)).length;
+        const digits = digitsOnly(display.value);
+        raw.value = digits;
+        display.value = format(digits);
+        let position = 0;
+        let count = 0;
+        while (position < display.value.length && count < before) {
+            if (/\d/.test(display.value[position])) count++;
+            position++;
+        }
+        display.setSelectionRange(position, position);
+    });
+    display.addEventListener("blur", () => {
+        raw.value = digitsOnly(display.value);
+        display.value = format(raw.value || "0");
+    });
+    raw.value = digitsOnly(raw.value || display.value);
+    display.value = format(raw.value);
+}
+bindPaymentTotalInput();
