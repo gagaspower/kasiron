@@ -10,10 +10,22 @@
         <p class="mt-2 text-sm text-slate-500">Satu transaksi pembayaran hanya untuk satu supplier, tetapi dapat dialokasikan ke beberapa nota.</p>
     </div>
     @if($errors->any())<div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Periksa kembali data pembayaran.</p><ul class="mt-2 list-inside list-disc">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-    <form method="GET" action="{{ route('purchases.payments.create') }}" class="mb-5 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-end">
-        <div class="w-full sm:max-w-sm"><label class="mb-1.5 block text-sm font-medium text-slate-700">Supplier</label><select name="supplier_id" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm"><option value="">Pilih supplier</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected($selectedSupplier === $supplier->id)>{{ $supplier->nama }}</option>@endforeach</select></div>
-        <button class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">Tampilkan nota</button>
+    <form method="GET" action="{{ route('purchases.payments.create') }}" data-payment-invoice-filter class="mb-5 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-end">
+        <div class="relative w-full sm:max-w-sm" data-purchase-supplier-picker data-options-url="{{ route('suppliers.options') }}">
+            <label for="payment-supplier-search" class="mb-2 block text-sm font-medium text-slate-700">Supplier <span class="text-rose-500">*</span></label>
+            <input type="hidden" name="supplier_id" value="{{ $selectedSupplier }}" data-purchase-supplier-value>
+            <div class="relative">
+                <input id="payment-supplier-search" type="text" autocomplete="off" value="{{ $suppliers->firstWhere('id', $selectedSupplier)?->nama }}" placeholder="Cari supplier..." data-purchase-supplier-search aria-controls="payment-supplier-options" aria-expanded="false" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 pr-10 text-sm outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10">
+                <button type="button" data-purchase-supplier-clear aria-label="Hapus supplier" class="absolute inset-y-0 right-0 hidden items-center px-3 text-slate-400 hover:text-rose-600">×</button>
+            </div>
+            <div id="payment-supplier-options" data-purchase-supplier-options class="absolute z-30 mt-1 hidden max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg" role="listbox"></div>
+        </div>
+        <button type="submit" data-payment-show-invoices class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+            <span data-payment-button-label>Tampilkan Nota</span>
+            <span data-payment-button-spinner class="hidden size-4 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600"></span>
+        </button>
     </form>
+    <div data-payment-invoice-content>
     @if($selectedSupplier)
         <form method="POST" action="{{ route('purchases.payments.store') }}" class="space-y-5">
             @csrf
@@ -24,7 +36,7 @@
                     @forelse($invoices as $invoice)
                         @php($paid = (float) $invoice->sudah_dibayar)
                         @php($remaining = round((float) $invoice->total - $paid, 2))
-                        <tr><td class="px-5 py-4"><p class="font-semibold text-slate-800">{{ $invoice->nomor_pembelian }}</p><p class="mt-1 text-xs text-slate-400">{{ $invoice->nomor_faktur_supplier }}</p></td><td class="px-3 py-4 text-slate-600">{{ $invoice->tanggal_pembelian?->format('d M Y') }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ number_format((float) $invoice->total, 0, ',', '.') }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ number_format($paid, 0, ',', '.') }}</td><td class="px-3 py-4 text-right font-semibold tabular-nums">Rp {{ number_format($remaining, 0, ',', '.') }}</td><td class="px-5 py-4"><input name="alokasi[{{ $invoice->id }}]" type="number" min="0" max="{{ $remaining }}" step="0.01" value="{{ old('alokasi.'.$invoice->id, 0) }}" class="w-40 rounded-lg border border-slate-200 px-3 py-2 text-right text-sm tabular-nums"></td></tr>
+                        <tr><td class="px-5 py-4"><p class="font-semibold text-slate-800">{{ $invoice->nomor_pembelian }}</p><p class="mt-1 text-xs text-slate-400">{{ $invoice->nomor_faktur_supplier }}</p></td><td class="px-3 py-4 text-slate-600">{{ $invoice->tanggal_pembelian?->format('d M Y') }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ number_format((float) $invoice->total, 0, ',', '.') }}</td><td class="px-3 py-4 text-right tabular-nums">Rp {{ number_format($paid, 0, ',', '.') }}</td><td class="px-3 py-4 text-right font-semibold tabular-nums">Rp {{ number_format($remaining, 0, ',', '.') }}</td><td class="px-5 py-4 text-right"><input name="alokasi[{{ $invoice->id }}]" type="number" min="0" max="{{ $remaining }}" step="0.01" value="{{ old('alokasi.'.$invoice->id, 0) }}" class="ml-auto block w-40 rounded-lg border border-slate-200 px-3 py-2 text-right text-sm tabular-nums"></td></tr>
                     @empty<tr><td colspan="6" class="px-5 py-10 text-center text-sm text-slate-500">Supplier ini tidak memiliki nota dengan sisa tagihan.</td></tr>@endforelse
                 </tbody></table></div>
             </section>
@@ -33,8 +45,8 @@
                 <h2 class="font-semibold text-slate-900">Informasi pembayaran</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Tanggal pembayaran</label><input type="date" name="tanggal_pembayaran" value="{{ old('tanggal_pembayaran', now()->toDateString()) }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm"></div>
-                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Uang yang benar-benar dibayarkan</label><input type="number" name="total_bayar" min="0.01" step="0.01" value="{{ old('total_bayar') }}" required class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm"></div>
-                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Metode pembayaran</label><select name="metode_pembayaran" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm"><option value="transfer">Transfer</option><option value="tunai">Tunai</option><option value="qris">QRIS</option><option value="cek">Cek</option><option value="giro">Giro</option><option value="lainnya">Lainnya</option></select></div>
+                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Uang yang benar-benar dibayarkan</label><input type="hidden" name="total_bayar" value="{{ old('total_bayar') }}" data-payment-total-raw><input type="text" inputmode="numeric" autocomplete="off" value="{{ old('total_bayar') }}" placeholder="0" required data-payment-total-display class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm tabular-nums"></div>
+                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Metode pembayaran</label><select name="metode_pembayaran" required class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm"><option value="tunai" @selected(old('metode_pembayaran') === 'tunai')>Tunai</option><option value="transfer_qris" @selected(old('metode_pembayaran', 'transfer_qris') === 'transfer_qris')>Transfer/QRIS</option></select></div>
                     <div><label class="mb-1.5 block text-sm font-medium text-slate-700">Referensi pembayaran</label><input name="referensi_pembayaran" value="{{ old('referensi_pembayaran') }}" maxlength="150" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm"></div>
                     <div class="sm:col-span-2"><label class="mb-1.5 block text-sm font-medium text-slate-700">Catatan</label><textarea name="catatan" rows="2" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">{{ old('catatan') }}</textarea></div>
                 </div>
@@ -44,4 +56,9 @@
             @endif
         </form>
     @endif
+    </div>
+@endsection
+
+@section('script')
+    @vite(['resources/js/pages/purchases.js'])
 @endsection
