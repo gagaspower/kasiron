@@ -638,7 +638,7 @@ if (balanceResults) {
     });
 
     document.addEventListener("click", async event => {
-        const link = event.target.closest("[data-balance-results] nav a, [data-balance-results] a[rel='next'], [data-balance-results] a[rel='prev']");
+        const link = event.target.closest("[data-balance-reset], [data-balance-results] nav a, [data-balance-results] a[rel='next'], [data-balance-results] a[rel='prev']");
         if (!link?.href) return;
         event.preventDefault();
         try { await refreshBalances(link.href, { pushHistory: true }); }
