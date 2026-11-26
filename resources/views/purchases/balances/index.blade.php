@@ -11,6 +11,11 @@
     </div>
 
     <div data-balance-results>
+    @if($errors->any())
+        <div data-balance-validation class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {{ $errors->first() }}
+        </div>
+    @endif
     @if(session('success'))<div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
 
     <form method="GET" action="{{ route('purchases.balances.index') }}" data-balance-filter class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -124,4 +129,8 @@
         <div class="border-t border-slate-100 px-5 py-4">{{ $settlements->onEachSide(1)->links('vendor.pagination.kasiron') }}</div>
     </section>
     </div>
+@endsection
+
+@section('script')
+    @vite(['resources/js/pages/purchases.js'])
 @endsection
